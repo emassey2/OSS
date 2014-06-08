@@ -1,0 +1,106 @@
+<html>
+<body>
+<pre>
+<h1>µVision Build Log</h1>
+<h2>Project:</h2>
+G:\Programming\CortexM\OSS\project-src\ece353_base_project.uvproj
+Project File Date:  06/07/2014
+
+<h2>Output:</h2>
+Build target 'base_project'
+compiling main.c...
+linking...
+Program Size: Code=1244 RO-data=16 RW-data=0 ZI-data=4096  
+".\ece353_base_project.axf" - 0 Error(s), 0 Warning(s).
+Load "G:\\Programming\\CortexM\\OSS\\project-src\\ece353_base_project.axf" 
+Connecting: Mode=JTAG, Speed=1000000Hz
+Erase Done.
+Programming Done.
+Verify OK.
+s).
+Target not created
+0: identifier "GPIO_CONFIG" is undefined
+   GPIO_CONFIG portB_config = {
+inc/board_config.h(130): error:  #20: identifier "GPIO_CONFIG" is undefined
+   GPIO_CONFIG portC_config = {
+inc/board_config.h(172): error:  #20: identifier "GPIO_CONFIG" is undefined
+   GPIO_CONFIG portD_config = {
+inc/board_config.h(192): error:  #20: identifier "GPIO_CONFIG" is undefined
+   GPIO_CONFIG portE_config = {
+inc/board_config.h(212): error:  #20: identifier "GPIO_CONFIG" is undefined
+  GPIO_CONFIG portF_config = {
+inc/board_config.h(233): error:  #20: identifier "UART_CONFIG" is undefined
+  UART_CONFIG UART0_config = {
+inc/board_config.h(234): error:  #20: identifier "ENABLED" is undefined
+    ENABLED,                                    // UART
+inc/board_config.h(237): error:  #20: identifier "_8BITS" is undefined
+    _8BITS,                   // WordLen
+inc/board_config.h(244): error:  #20: identifier "RX_ONE_EIGHTH" is undefined
+    RX_ONE_EIGHTH,            // RxIntFIFO
+inc/board_config.h(245): error:  #20: identifier "TX_ONE_EIGHTH" is undefined
+    TX_ONE_EIGHTH,            // TxIntFIFO
+main.c: 1 warning, 11 errors
+compiling UART.c...
+UART.c(4): error:  #20: identifier "uint32_t" is undefined
+        uint32_t delay;
+UART.c(11): error:  #20: identifier "SYSCTL_RCGCGPIO_R" is undefined
+    SYSCTL_RCGCGPIO_R |= SYSCTL_RCGCGPIO_R0;
+UART.c(11): error:  #20: identifier "SYSCTL_RCGCGPIO_R0" is undefined
+    SYSCTL_RCGCGPIO_R |= SYSCTL_RCGCGPIO_R0;
+UART.c(15): error:  #20: identifier "SYSCTL_RCGCGPIO_R4" is undefined
+        SYSCTL_RCGCGPIO_R |= SYSCTL_RCGCGPIO_R4;
+UART.c(19): error:  #20: identifier "GPIO_PORTA_DIR_R" is undefined
+        GPIO_PORTA_DIR_R &= ~PA0_U0_RX;
+UART.c(19): error:  #20: identifier "PA0_U0_RX" is undefined
+        GPIO_PORTA_DIR_R &= ~PA0_U0_RX;
+UART.c(20): error:  #20: identifier "GPIO_PORTE_DIR_R" is undefined
+        GPIO_PORTE_DIR_R &= ~PE4_U5_RX;
+UART.c(20): error:  #20: identifier "PE4_U5_RX" is undefined
+        GPIO_PORTE_DIR_R &= ~PE4_U5_RX;
+UART.c(22): error:  #20: identifier "PA1_U0_TX" is undefined
+        GPIO_PORTA_DIR_R |= PA1_U0_TX;
+UART.c(23): error:  #20: identifier "PE5_U5_TX" is undefined
+        GPIO_PORTE_DIR_R |= PE5_U5_TX;
+UART.c(27): error:  #20: identifier "GPIO_PORTA_DEN_R" is undefined
+    GPIO_PORTA_DEN_R |= PA0_U0_RX | PA1_U0_TX;
+UART.c(28): error:  #20: identifier "GPIO_PORTE_DEN_R" is undefined
+        GPIO_PORTE_DEN_R |= PE4_U5_RX | PE5_U5_TX;
+UART.c(31): error:  #20: identifier "GPIO_PORTA_AFSEL_R" is undefined
+    GPIO_PORTA_AFSEL_R |= PA0_U0_RX | PA1_U0_TX;
+UART.c(32): error:  #20: identifier "GPIO_PORTE_AFSEL_R" is undefined
+        GPIO_PORTE_AFSEL_R |= PE4_U5_RX | PE5_U5_TX;
+UART.c(35): error:  #20: identifier "GPIO_PORTA_PCTL_R" is undefined
+    GPIO_PORTA_PCTL_R |= GPIO_PCTL_PA0_U0RX | GPIO_PCTL_PA1_U0TX;
+UART.c(35): error:  #20: identifier "GPIO_PCTL_PA0_U0RX" is undefined
+    GPIO_PORTA_PCTL_R |= GPIO_PCTL_PA0_U0RX | GPIO_PCTL_PA1_U0TX;
+UART.c(35): error:  #20: identifier "GPIO_PCTL_PA1_U0TX" is undefined
+    GPIO_PORTA_PCTL_R |= GPIO_PCTL_PA0_U0RX | GPIO_PCTL_PA1_U0TX;
+UART.c(36): error:  #20: identifier "GPIO_PORTE_PCTL_R" is undefined
+        GPIO_PORTE_PCTL_R |= GPIO_PCTL_PE4_U5RX | GPIO_PCTL_PE5_U5TX;
+UART.c(36): error:  #20: identifier "GPIO_PCTL_PE4_U5RX" is undefined
+        GPIO_PORTE_PCTL_R |= GPIO_PCTL_PE4_U5RX | GPIO_PCTL_PE5_U5TX;
+UART.c(36): error:  #20: identifier "GPIO_PCTL_PE5_U5TX" is undefined
+        GPIO_PORTE_PCTL_R |= GPIO_PCTL_PE4_U5RX | GPIO_PCTL_PE5_U5TX;
+UART.c(44): error:  #20: identifier "SYSCTL_RCGCUART_R" is undefined
+    SYSCTL_RCGCUART_R |= SYSCTL_RCGCUART_R0;
+UART.c(44): error:  #20: identifier "SYSCTL_RCGCUART_R0" is undefined
+    SYSCTL_RCGCUART_R |= SYSCTL_RCGCUART_R0;
+UART.c(48): error:  #20: identifier "UART0_CTL_R" is undefined
+        UART0_CTL_R &= ~UART_CTL_UARTEN;
+UART.c(48): error:  #20: identifier "UART_CTL_UARTEN" is undefined
+        UART0_CTL_R &= ~UART_CTL_UARTEN;
+UART.c(51): error:  #20: identifier "UART0_IBRD_R" is undefined
+    UART0_IBRD_R = 520;
+UART.c(52): error:  #20: identifier "UART0_FBRD_R" is undefined
+    UART0_FBRD_R = 53;
+UART.c(55): error:  #20: identifier "UART0_LCRH_R" is undefined
+    UART0_LCRH_R |= UART_LCRH_WLEN_8 | UART_LCRH_FEN;
+UART.c(55): error:  #20: identifier "UART_LCRH_WLEN_8" is undefined
+    UART0_LCRH_R |= UART_LCRH_WLEN_8 | UART_LCRH_FEN;
+UART.c(55): error:  #20: identifier "UART_LCRH_FEN" is undefined
+    UART0_LCRH_R |= UART_LCRH_WLEN_8 | UART_LCRH_FEN;
+UART.c(58): error:  #20: identifier "UART_CTL_TXE" is undefined
+    UART0_CTL_R |= UART_CTL_TXE | UART_CTL_RXE | UART_CTL_UARTEN;
+UART.c: 0 warnings, 30 errors
+".\ece353_base_project.axf" - 41 Error(s), 1 Warning(s).
+Target not created
