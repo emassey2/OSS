@@ -230,4 +230,7 @@ pip-log.txt
 *.lnp
 *.htm
 *.sct
+*.crf
+*.uvproj
+*.Owner
 
