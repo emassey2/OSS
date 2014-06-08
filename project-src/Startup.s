@@ -78,7 +78,7 @@ __heap_limit
 ; External declaration for the interrupt handler used by the application.
 ;
 ;******************************************************************************
-
+		EXTERN SYSTICKIntHandler
 
 ;******************************************************************************
 ;
@@ -101,7 +101,7 @@ __Vectors       DCD     __initial_sp              		; Top of Stack
                 DCD     IntDefaultHandler          		; Debug Monitor Handler
                 DCD     0                         		; Reserved
                 DCD     IntDefaultHandler            	; PendSV Handler
-                DCD     IntDefaultHandler           	; SysTick Handler
+                DCD     SYSTICKIntHandler           	; SysTick Handler
 
                 ; External Interrupts
 

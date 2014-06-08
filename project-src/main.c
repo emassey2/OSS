@@ -4,27 +4,16 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include "inc/defines.h"
 #include "inc/UART.h"
+#include "inc/GPIO.h"
+#include "inc/timers.h"
 #include "inc/lm4f120h5qr.h"
 
 
 /******************************************************************************
  * Defines
  *****************************************************************************/
-#define PORTA   0x40004000
-#define PORTB   0x40005000
-#define PORTC   0x40006000
-#define PORTD   0x40007000
-#define PORTE   0x40024000
-#define PORTF   0x40025000
-
-
-//*****************************************************************************
-// External Functions
-//*****************************************************************************
-extern void PLL_Init(void);
-extern void EnableInterrupts(void);
-extern void DisableInterrupts(void);
 
 
 /******************************************************************************
@@ -34,15 +23,31 @@ extern void DisableInterrupts(void);
  
 
 //*****************************************************************************
+// External Functions
 //*****************************************************************************
-int 
-main(void) {
+extern void PLL_Init(void);
+extern void EnableInterrupts(void);
+extern void DisableInterrupts(void);
+
+
+//*****************************************************************************
+//*****************************************************************************
+int main(void) {
   PLL_Init();
 	
 	initPollingUART0();
-	UART0_TxPoll("\n\r\n\rOpen Source Synth V.01");
+	UART0_TxPoll("\n\r\n\r\n\r*****Open Source Synth V.01*****");
 	
+	UART0_TxPoll("\n\rInitializing GPIO Ports...");
+	initGPIOPorts();
+	
+	UART0_TxPoll("\n\rInitializing Timers...");
+	initTimers();
+	
+	
+	UART0_TxPoll("\n\rEntering Main Loop");
   while(1) {
+		
   };
 
   
