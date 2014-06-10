@@ -1,5 +1,7 @@
 #include "inc/timers.h"
 #include "inc/defines.h"
+#include "inc/waves.h"
+#include <stdint.h>
 
 /*******************************************************************************************************
  * This is a DDS Frequency Generator and thus we use the equation Fout = (M (REFCLK)) / 2^N
@@ -18,13 +20,20 @@
  *
  * Fout is controlled by the user but we precalculate 2^N / REFCLK to save time
  * Thus our turning word M = 2^32 / 7902.02 * Fout = 543528.1113088 * Fout
+ * 
+ * Our DAC is provided using Timer0 in conjunction with the alternate function of pin B6
  ******************************************************************************************************/
 
-volatile uint32_t offset0 = 0;
+
+/******************************************************************************
+ * Global Variables
+ *****************************************************************************/
+ 
+volatile uint32_t tword0 = 54336705;
 
 void initTimers() {
 	initSysTick();
-	//initTimer0A();
+	initTimer0PWM();
 }
 
 void initSysTick() {
@@ -35,26 +44,28 @@ void initSysTick() {
 									 NVIC_ST_CTRL_CLK_SRC;
 }
 
-void initTimer0A() {
-	int i;
-	SYSCTL_RCGCTIMER_R |= SYSCTL_RCGCTIMER_R0;	// activate timer0
-	for(i = 0; i < 1; i++);											// delay
-	TIMER0_CTL_R &= ~TIMER_CTL_TAEN;						// disable Timer0 during setup
-	TIMER0_CFG_R = TIMER_CFG_32_BIT_TIMER;			// configure for 32bit timer mode
-	TIMER0_TAMR_R = TIMER_TAMR_TAMR_PERIOD;			// configure for periodic mode
-	TIMER0_TAILR_R = TIMER0A_RELOAD_VAL;				// reload value
-	TIMER0_ICR_R = TIMER_ICR_TATOCINT;					// clear timer0A timeout flag
-	TIMER0_IMR_R |= TIMER_IMR_TATOIM;						// arm timeout interrupt
-	NVIC_PRI4_R = (NVIC_PRI4_R & 0x00FFFFFF) | 0x00000000;	// set priority to 0
-	NVIC_EN0_R = NVIC_EN0_INT19;								// enable interrupt in NVIC
-	TIMER0_CTL_R |= TIMER_CTL_TAEN;							// enable Timer0A
+void initTimer0PWM() {
+	uint8_t delay;
+	SYSCTL_RCGCTIMER_R |= SYSCTL_RCGCTIMER_R0;	// enable clock gating reg for timer0
+	delay = SYSCTL_RCGCTIMER_R0;								// wait a cycle for the CGR
+	TIMER0_CTL_R &= ~TIMER_CTL_TAEN;						// disable timer during setup
+	TIMER0_CFG_R |= TIMER_CFG_16_BIT;						// configure for 16bit mode
+	TIMER0_TAMR_R |= TIMER_TAMR_TAAMS;					// enable timer0 alternate mode
+	TIMER0_TAMR_R &= ~TIMER_TAMR_TACMR;					// disable capture mode
+	TIMER0_TAMR_R |= TIMER_TAMR_TAMR_PERIOD;		// configure timer0 for periodic mode
+	// defaults to output state to not inverted
+	// defaults to prescaler to 0
+	TIMER0_TAMR_R |= TIMER_TAMR_TAPWMIE;				// enable interrupts
+	TIMER0_TAILR_R = TIMER0A_RELOAD_VAL;					// load in starting value
+	TIMER0_TAMATCHR_R = TIMER0A_RELOAD_VAL >> 1; 	// duty cycle of 50%
+	TIMER0_CTL_R |= TIMER_CTL_TAEN;								//enable timer
 }
 
-
-void SYSTICKIntHandler(void) {
-	GPIO_PORTA_DATA_R ^= AUDIO_OUT;
-	/* static uint32_t phaseAccum0 = 0;
-	static uint32_t tword0 = 1000;
+void SYSTICKIntHandler() {
+	static uint32_t phaseAccum0 = 0;
+	static uint8_t offset0 = 0;
 	phaseAccum0 += tword0;						// Increment the Phase Accumulator0
-	offset0 = phaseAccum0 >> 24;  		// use only the upper 8 bits from the phaseAccum0 (256)*/
+	offset0 = phaseAccum0 >> 24;  		// use only the upper 8 bits from the phaseAccum0 (256)
+	TIMER0_TAILR_R = wave[offset0];					// set new period
+	TIMER0_TAMATCHR_R = wave[offset0] >> 1;	// make sure duty cycle is still 50%
 }

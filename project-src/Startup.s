@@ -124,7 +124,7 @@ __Vectors       DCD     __initial_sp              		; Top of Stack
                 DCD     IntDefaultHandler           	;  16: ADC Sequence 2
                 DCD     IntDefaultHandler           	;  17: ADC Sequence 3
                 DCD     IntDefaultHandler              	;  18: Watchdog timer
-                DCD     IntDefaultHandler           	;  19: Timer 0 subtimer A
+                DCD     IntDefaultHandler				;  19: Timer 0 subtimer A
                 DCD     IntDefaultHandler           	;  20: Timer 0 subtimer B
                 DCD     IntDefaultHandler           	;  21: Timer 1 subtimer A
                 DCD     IntDefaultHandler           	;  22: Timer 1 subtimer B

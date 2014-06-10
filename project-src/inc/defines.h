@@ -8,4 +8,4 @@
 #define PIN_6     (1 << 6)
 #define PIN_7     (1 << 7)
 
-#define AUDIO_OUT PIN_2
+#define AUDIO_OUT PIN_6

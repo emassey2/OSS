@@ -17,24 +17,19 @@ void initPollingUART0(){
   
 	// Set the Direction 0 is IN 1 is OUT
 	GPIO_PORTA_DIR_R &= ~PA0_U0_RX;
-	GPIO_PORTE_DIR_R &= ~PE4_U5_RX;
 	
 	GPIO_PORTA_DIR_R |= PA1_U0_TX;
-	GPIO_PORTE_DIR_R |= PE5_U5_TX;
 
 	
   // Set the Digital Enable
   GPIO_PORTA_DEN_R |= PA0_U0_RX | PA1_U0_TX;
-	GPIO_PORTE_DEN_R |= PE4_U5_RX | PE5_U5_TX;
   
   // Set the Alternate Function
   GPIO_PORTA_AFSEL_R |= PA0_U0_RX | PA1_U0_TX;
-	GPIO_PORTE_AFSEL_R |= PE4_U5_RX | PE5_U5_TX;
 	
   // Set the Port Control Register 
   GPIO_PORTA_PCTL_R |= GPIO_PCTL_PA0_U0RX | GPIO_PCTL_PA1_U0TX;
-	GPIO_PORTE_PCTL_R |= GPIO_PCTL_PE4_U5RX | GPIO_PCTL_PE5_U5TX;
-  
+	
   
   // *******************************
   // Set up the UART registers
@@ -58,12 +53,10 @@ void initPollingUART0(){
   UART0_CTL_R |= UART_CTL_TXE | UART_CTL_RXE | UART_CTL_UARTEN;
   
   // Wait until the UART is avaiable
-  while( !(SYSCTL_PRUART_R & SYSCTL_PRUART_R0 ))
-  {}
+  while( !(SYSCTL_PRUART_R & SYSCTL_PRUART_R0 ));
   
   delay = 500;
-  while( delay != 0)
-  {
+  while( delay != 0) {
     delay--;
   }
 }
@@ -87,8 +80,7 @@ void UART0_TxPoll(char *data) {
   
   if ( data != 0)
   {
-    while(*data != '\0')
-    {
+    while(*data != '\0') {
       while( ((UART0_FR_R) & (UART_FR_TXFF)) != 0 );
       UART0_DR_R = *data & 0x00FF;;
       data++;

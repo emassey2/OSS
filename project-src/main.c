@@ -19,8 +19,8 @@
 /******************************************************************************
  * Global Variables
  *****************************************************************************/
- 
- 
+
+
 
 //*****************************************************************************
 // External Functions
@@ -36,7 +36,7 @@ int main(void) {
   PLL_Init();
 	
 	initPollingUART0();
-	UART0_TxPoll("\n\r\n\r\n\r*****Open Source Synth V.01*****");
+	UART0_TxPoll("\n\r\n\r\n\r*****Open Source Synth V.02*****");
 	
 	UART0_TxPoll("\n\rInitializing GPIO Ports...");
 	initGPIOPorts();
