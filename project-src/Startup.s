@@ -79,6 +79,7 @@ __heap_limit
 ;
 ;******************************************************************************
 		EXTERN SYSTICKIntHandler
+		EXTERN TIMER1IntHandler
 
 ;******************************************************************************
 ;
@@ -126,7 +127,7 @@ __Vectors       DCD     __initial_sp              		; Top of Stack
                 DCD     IntDefaultHandler              	;  18: Watchdog timer
                 DCD     IntDefaultHandler				;  19: Timer 0 subtimer A
                 DCD     IntDefaultHandler           	;  20: Timer 0 subtimer B
-                DCD     IntDefaultHandler           	;  21: Timer 1 subtimer A
+                DCD     TIMER1IntHandler	           	;  21: Timer 1 subtimer A
                 DCD     IntDefaultHandler           	;  22: Timer 1 subtimer B
                 DCD     IntDefaultHandler           	;  23: Timer 2 subtimer A
                 DCD     IntDefaultHandler           	;  24: Timer 2 subtimer B

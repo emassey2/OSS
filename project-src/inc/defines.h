@@ -9,3 +9,5 @@
 #define PIN_7     (1 << 7)
 
 #define AUDIO_OUT PIN_6
+
+#define CLOCK_RATE 80000000

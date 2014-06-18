@@ -2,6 +2,7 @@
 #include "inc/defines.h"
 #include "inc/waves.h"
 #include <stdint.h>
+#include <stdbool.h>
 
 /*******************************************************************************************************
  * This is a DDS Frequency Generator and thus we use the equation Fout = (M (REFCLK)) / 2^N
@@ -24,16 +25,20 @@
  * Our DAC is provided using Timer0 in conjunction with the alternate function of pin B6
  ******************************************************************************************************/
 
+// above is out of date as I am currently trying diffrent values to find best one empirically 
 
 /******************************************************************************
  * Global Variables
  *****************************************************************************/
  
-volatile uint32_t tword0 = 54336705;
+volatile uint32_t tword0 = (136902 * 60);
+volatile uint32_t tword1 = (543528 * 350);
+volatile uint16_t lfsr = 1;
 
 void initTimers() {
 	initSysTick();
 	initTimer0PWM();
+	initTimer1Noise();
 }
 
 void initSysTick() {
@@ -53,19 +58,61 @@ void initTimer0PWM() {
 	TIMER0_TAMR_R |= TIMER_TAMR_TAAMS;					// enable timer0 alternate mode
 	TIMER0_TAMR_R &= ~TIMER_TAMR_TACMR;					// disable capture mode
 	TIMER0_TAMR_R |= TIMER_TAMR_TAMR_PERIOD;		// configure timer0 for periodic mode
+	TIMER0_TAMR_R |= TIMER_TAMR_TAILD;					// enable loading on interval (start of every cycle)
+	TIMER0_TAMR_R |= TIMER_TAMR_TAMRSU;					// same thing but with match register
 	// defaults to output state to not inverted
 	// defaults to prescaler to 0
-	TIMER0_TAMR_R |= TIMER_TAMR_TAPWMIE;				// enable interrupts
-	TIMER0_TAILR_R = TIMER0A_RELOAD_VAL;					// load in starting value
-	TIMER0_TAMATCHR_R = TIMER0A_RELOAD_VAL >> 1; 	// duty cycle of 50%
+	// TIMER0_TAMR_R |= TIMER_TAMR_TAPWMIE;				// enable interrupts
+	TIMER0_TAILR_R = TIMER0A_RELOAD_VAL;					// set period to 256 (0-255)
+	TIMER0_TAMATCHR_R = TIMER0A_RELOAD_VAL >> 1; 	// default duty cycle of 50%
 	TIMER0_CTL_R |= TIMER_CTL_TAEN;								//enable timer
 }
+
+void initTimer1Noise() {	
+	int i;
+	SYSCTL_RCGCTIMER_R |= SYSCTL_RCGCTIMER_R1;	// activate timer1
+	for(i = 0; i < 1; i++);									// delay
+	TIMER1_CTL_R &= ~TIMER_CTL_TAEN;				// disable Timer1 during setup
+	TIMER1_CFG_R = TIMER_CFG_16_BIT;				// configure for 16bit timer mode
+	TIMER1_TAMR_R = TIMER_TAMR_TAMR_PERIOD;	// configure for periodic mode
+	TIMER1_TAILR_R = TIMER1A_RELOAD_VAL;		// reload value
+	TIMER1_TAPR_R = TIMER1A_PRESCALE;				// set timer period
+	TIMER1_ICR_R = TIMER_ICR_TATOCINT;			// clear timer1A timeout flag
+	TIMER1_IMR_R |= TIMER_IMR_TATOIM;				// arm timeout interrupt
+	NVIC_PRI5_R = (NVIC_PRI5_R & 0xFFFF00FF) | 0x00000000;// set priority to 0 as it is interrupting at only 20hz
+	NVIC_EN0_R = NVIC_EN0_INT21;						// enable interrupt in NVIC
+	TIMER1_CTL_R |= TIMER_CTL_TAEN;					// enable Timer1A
+}
+
 
 void SYSTICKIntHandler() {
 	static uint32_t phaseAccum0 = 0;
 	static uint8_t offset0 = 0;
+	static uint32_t phaseAccum1 = 0;
+	static uint8_t offset1 = 0;
+	
+	/*update noise register using a linear feedback shift register (this one is based off the Noise APU of the NES)
+	feedBack = ((noiseReg & bit0) ^ ((noiseReg & bit1) >> 1)) << 15;
+	//feeback becomes bit 15 of noiseReg
+	noiseReg = feedBack | (noiseReg >> 1);*/
+	
+	
+	
+	//voice 1
 	phaseAccum0 += tword0;						// Increment the Phase Accumulator0
 	offset0 = phaseAccum0 >> 24;  		// use only the upper 8 bits from the phaseAccum0 (256)
-	TIMER0_TAILR_R = wave[offset0];					// set new period
-	TIMER0_TAMATCHR_R = wave[offset0] >> 1;	// make sure duty cycle is still 50%
+	
+	//voice 2
+	phaseAccum1 += tword1;						// Increment the Phase Accumulator0
+	offset1 = phaseAccum1 >> 24;  		// use only the upper 8 bits from the phaseAccum0 (256)
+	
+	//combine voices (add and shift right one to get a rough average)
+	TIMER0_TAMATCHR_R = ((lfsr >> 8));//+ sine[offset1]) >> 1;	// change duty cycle
+}
+
+void TIMER1IntHandler() {
+	static uint16_t bit = 0;
+	TIMER1_ICR_R = TIMER_ICR_TATOCINT;	// acknowledge timer1A
+	bit  = ((lfsr >> 0) ^ (lfsr >> 2) ^ (lfsr >> 3) ^ (lfsr >> 5) ) & 1;
+  lfsr =  (lfsr >> 1) | (bit << 15);
 }
