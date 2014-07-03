@@ -234,3 +234,12 @@ pip-log.txt
 *.uvproj
 *.Owner
 *.iex
+
+#############
+## Inventor
+#############
+
+*.ipj
+*.ipt
+*.lck
+*.gcode
