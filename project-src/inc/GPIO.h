@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-#include "lm4f120h5qr.h"
+#include "tm4c123gh6pm.h"
 
 /******************************************************************************
  * Defines

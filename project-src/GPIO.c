@@ -27,6 +27,6 @@ void initGPIOPortB() {
 	GPIO_PORTB_ODR_R &= ~AUDIO_OUT;							// set open drain to 0
 	GPIO_PORTB_AFSEL_R |= AUDIO_OUT;						// enable alternate function (PWM)
 	GPIO_PORTB_PCTL_R &= ~GPIO_PCTL_PB6_M;			// mask off any stray bits
-	GPIO_PORTB_PCTL_R |= GPIO_PCTL_PB6_T0CCP0;	// accept timer0 pwm on pin B6
+	GPIO_PORTB_PCTL_R |= GPIO_PCTL_PB6_M0PWM0;	// accept timer0 pwm on pin B6
 }
  

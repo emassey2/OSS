@@ -4,41 +4,19 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-/*******************************************************************************************************
- * This is a DDS Frequency Generator and thus we use the equation Fout = (M (REFCLK)) / 2^N
- * Where Fout is desired frequency out, M is the tuning word, REFCLK is the frequency of the reference
- * clock which in our case is the frequesncy of SysTick. and N is the length (bit-width) of 
- * the phase accumulator (32 bits).
- * 
- * The synth is designed to have an 8 octave max range. Therefore our highest frequency will be 7902hz
- * Knowing this we can solve for a theoretical minimum Reload Value to satisfy our reference value
- * Using the equation above: 7902hz = ((2^32 - 1) * ( (80*10^6) / x)) / 2^32
- * Solving for x we find our reload value to be 10124.
- * Thus SysTick has a reload value of 10124 and our clk is 80mhz. 80mhz / 10124 = 7902.02Hz = REFCLK
- *
- * By changing the tuning word we can achive diffrent frequencies
- * Solving for M we get the equation M = 2^32 * Fout / 7902.02
- *
- * Fout is controlled by the user but we precalculate 2^N / REFCLK to save time
- * Thus our turning word M = 2^32 / 7902.02 * Fout = 543528.1113088 * Fout
- * 
- * Our DAC is provided using Timer0 in conjunction with the alternate function of pin B6
- ******************************************************************************************************/
-
-// above is out of date as I am currently trying diffrent values to find best one empirically 
 
 /******************************************************************************
  * Global Variables
  *****************************************************************************/
  
-volatile uint32_t tword0 = (136902 * 60);
-volatile uint32_t tword1 = (543528 * 350);
+volatile uint32_t tword0 = (136902 * 220);
+volatile uint32_t tword1 = (136902 * 440);
 volatile uint16_t lfsr = 1;
 
 void initTimers() {
 	initSysTick();
-	initTimer0PWM();
-	initTimer1Noise();
+	//initTimer0PWM();
+	//initTimer1Noise();
 }
 
 void initSysTick() {
@@ -90,14 +68,7 @@ void SYSTICKIntHandler() {
 	static uint8_t offset0 = 0;
 	static uint32_t phaseAccum1 = 0;
 	static uint8_t offset1 = 0;
-	
-	/*update noise register using a linear feedback shift register (this one is based off the Noise APU of the NES)
-	feedBack = ((noiseReg & bit0) ^ ((noiseReg & bit1) >> 1)) << 15;
-	//feeback becomes bit 15 of noiseReg
-	noiseReg = feedBack | (noiseReg >> 1);*/
-	
-	
-	
+
 	//voice 1
 	phaseAccum0 += tword0;						// Increment the Phase Accumulator0
 	offset0 = phaseAccum0 >> 24;  		// use only the upper 8 bits from the phaseAccum0 (256)
@@ -107,12 +78,14 @@ void SYSTICKIntHandler() {
 	offset1 = phaseAccum1 >> 24;  		// use only the upper 8 bits from the phaseAccum0 (256)
 	
 	//combine voices (add and shift right one to get a rough average)
-	TIMER0_TAMATCHR_R = ((lfsr >> 8));//+ sine[offset1]) >> 1;	// change duty cycle
+	PWM0_0_CMPA_R = (sine[offset0]);// + sine[offset1]) >> 1;	// change duty cycle
 }
 
 void TIMER1IntHandler() {
-	static uint16_t bit = 0;
-	TIMER1_ICR_R = TIMER_ICR_TATOCINT;	// acknowledge timer1A
-	bit  = ((lfsr >> 0) ^ (lfsr >> 2) ^ (lfsr >> 3) ^ (lfsr >> 5) ) & 1;
-  lfsr =  (lfsr >> 1) | (bit << 15);
+	static uint16_t fbb = 0;
+	TIMER1_ICR_R = TIMER_ICR_TATOCINT;						// acknowledge timer1A
+	fbb = (lfsr & 0x0001) ^ ((lfsr & 0x0002) >> 1);	// Get LSB (i.e., the output bit).
+	lfsr = lfsr >> 1;
+	lfsr = lfsr | (fbb << 13);
+	//TIMER0_TAMATCHR_R	= lfsr >> 7;
 }

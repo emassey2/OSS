@@ -8,7 +8,8 @@
 #include "inc/UART.h"
 #include "inc/GPIO.h"
 #include "inc/timers.h"
-#include "inc/lm4f120h5qr.h"
+#include "inc/PWM.h"
+#include "inc/tm4c123gh6pm.h"
 
 
 /******************************************************************************
@@ -40,10 +41,13 @@ int main(void) {
 	
 	UART0_TxPoll("\n\rInitializing GPIO Ports...");
 	initGPIOPorts();
+		
+	UART0_TxPoll("\n\rInitializing PWM Modules...");
+	initPWM();
 	
 	UART0_TxPoll("\n\rInitializing Timers...");
 	initTimers();
-	
+
 	
 	UART0_TxPoll("\n\rEntering Main Loop");
   while(1) {
