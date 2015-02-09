@@ -47,36 +47,16 @@ int main(void) {
 	
 	UART0_TxPoll("\n\rInitializing GPIO Ports...");
 	initGPIOPorts();
-	
-					GPIO_PORTD_DATA_R &= ~ROWS;
-				if (!GPIO_PORTE_DATA_R & 1) {
-					UART0_TxPoll("\n\rWTF?!?!?!?");
-				}
 		
 	UART0_TxPoll("\n\rInitializing PWM Modules...");
 	initPWM();
-				
-								GPIO_PORTD_DATA_R &= ~ROWS;
-				if (!GPIO_PORTE_DATA_R & 1) {
-					UART0_TxPoll("\n\rWTF?!?!?!?");
-				}
 	
 	UART0_TxPoll("\n\rInitializing Timers...");
 	initTimers();
-				
-								GPIO_PORTD_DATA_R &= ~ROWS;
-				if (!GPIO_PORTE_DATA_R & 1) {
-					UART0_TxPoll("\n\rWTF?!?!?!?");
-				}
 
 	
 	UART0_TxPoll("\n\rEntering Main Loop");
   while(1) {
-		if (alertScan) {
-				GPIO_PORTD_DATA_R &= ~ROWS;
-				if (!GPIO_PORTE_DATA_R & 1) {
-					UART0_TxPoll("\n\rWTF?!?!?!?");
-				}
 			alertScan = false;
 			scanMatrix(scanningMatrix);
 			
@@ -94,7 +74,4 @@ int main(void) {
 			}
 		}
   };
-
-  
-}
 
