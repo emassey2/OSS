@@ -25,8 +25,8 @@ void scanMatrix(bool matrix[NUM_ROWS][NUM_COLS]) {
 				break;
 		}
 		//set all pins low then set our new one high
-		//GPIO_PORTD_DATA_R &= ~ROWS;
-		//GPIO_PORTD_DATA_R |= row;
+		GPIO_PORTD_DATA_R &= ~ROWS;
+		GPIO_PORTD_DATA_R |= row;
 			
 		for (j =0; j < NUM_COLS; j++) {
 					switch(j) {
