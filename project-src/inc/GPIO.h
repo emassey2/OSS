@@ -30,7 +30,6 @@
 #define UART0_RX  PIN_0
 #define UART0_TX  PIN_1
 
-
 #endif
 
 
@@ -40,3 +39,5 @@
  void initGPIOPorts(void);
  void initGPIOPortA(void);
  void initGPIOPortB(void);
+ void initGPIOPortD(void);
+ void initGPIOPortE(void);

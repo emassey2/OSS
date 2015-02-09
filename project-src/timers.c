@@ -2,16 +2,16 @@
 #include "inc/defines.h"
 #include "inc/waves.h"
 #include <stdint.h>
-#include <stdbool.h>
 
 
 /******************************************************************************
  * Global Variables
  *****************************************************************************/
  
-volatile uint32_t tword0 = (136902 * 220);
+volatile uint32_t tword0 = (136902 * 350);
 volatile uint32_t tword1 = (136902 * 440);
 volatile uint16_t lfsr = 1;
+volatile bool alertScan;
 
 void initTimers() {
 	initSysTick();
@@ -20,7 +20,7 @@ void initTimers() {
 }
 
 void initSysTick() {
-	NVIC_ST_RELOAD_R = SYS_TICK_RELOAD_VAL;		// load in our reload value
+	NVIC_ST_RELOAD_R = SYS_TICK_RELOAD_VAL;		// load in our reload value 126.5ms
 	NVIC_ST_CURRENT_R = 0;										// clear the current value
 	NVIC_ST_CTRL_R = NVIC_ST_CTRL_ENABLE	| 	// set clksrc and enable high
 									 NVIC_ST_CTRL_INTEN 	|
@@ -64,10 +64,18 @@ void initTimer1Noise() {
 
 
 void SYSTICKIntHandler() {
+	static uint8_t tickCount;					// increments ever time in the loop. Resets at 80 ~= 10ms
 	static uint32_t phaseAccum0 = 0;
 	static uint8_t offset0 = 0;
 	static uint32_t phaseAccum1 = 0;
 	static uint8_t offset1 = 0;
+	
+	if (SYS_TICK_RESET_VAL > tickCount) {
+		tickCount++;
+	} else {
+		alertScan = true;
+		tickCount = 0;
+	}
 
 	//voice 1
 	phaseAccum0 += tword0;						// Increment the Phase Accumulator0
@@ -78,7 +86,7 @@ void SYSTICKIntHandler() {
 	offset1 = phaseAccum1 >> 24;  		// use only the upper 8 bits from the phaseAccum0 (256)
 	
 	//combine voices (add and shift right one to get a rough average)
-	PWM0_0_CMPA_R = (sine[offset0]);// + sine[offset1]) >> 1;	// change duty cycle
+	PWM0_0_CMPA_R = (sine[offset0] + sine[offset1]) >> 1;	// change duty cycle
 }
 
 void TIMER1IntHandler() {

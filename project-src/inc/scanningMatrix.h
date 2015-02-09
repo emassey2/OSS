@@ -1,13 +1,13 @@
 #include "board_config.h"
-
+#include "defines.h"
+#include <stdbool.h>
 
 /******************************************************************************
  * Defines
  *****************************************************************************/
- #define PWM_0_LOAD_VAL 255;	// 8bit coutdown 256-1=255
- #define PWM_CPM_DEFAULT 0;	// default to a duty cylce of 0/100
+
 
 /******************************************************************************
  * Function Prototypes
  *****************************************************************************/
-void initPWM(void);
+void scanMatrix(bool matrix[NUM_ROWS][NUM_COLS]);
