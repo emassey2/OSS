@@ -2,7 +2,6 @@
 #include "inc/defines.h"
 #include <stdint.h>
 #include <stdbool.h>
-#include "inc/UART.h"
 
 /*******************************************************************************************************
  * This is a DDS Frequency Generator and thus we use the equation Fout = (M (REFCLK)) / 2^N
@@ -29,27 +28,10 @@
 
 void initPWM() {
 	uint8_t i;
-	
-	GPIO_PORTD_DATA_R &= ~ROWS;
-	if (!GPIO_PORTE_DATA_R & 1) {
-		UART0_TxPoll("\n\rPWM START");
-	}
-	
 	SYSCTL_RCGC0_R |= SYSCTL_RCGC0_PWM0;				// enable PWM CGR
 	for(i = 0; i < 10; i++);	
-	
-	GPIO_PORTD_DATA_R &= ~ROWS;
-	if (!GPIO_PORTE_DATA_R & 1) {
-		UART0_TxPoll("\n\rPWM CGR");
-	}
-	
 	SYSCTL_RCGC2_R |= SYSCTL_RCGC2_GPIOB;			// enable port B for our output
 	for(i = 0; i < 10; i++);	
-	
-	GPIO_PORTD_DATA_R &= ~ROWS;
-	if (!GPIO_PORTE_DATA_R & 1) {
-		UART0_TxPoll("\n\rPORT B");
-	}
 	
 	// Pin6 on portB is enabled in GPIO.c
 	

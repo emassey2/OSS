@@ -1,5 +1,6 @@
 #include "inc/GPIO.h"
 #include "inc/defines.h"
+#include "inc/UART.h"
  
 uint8_t delay;
  
