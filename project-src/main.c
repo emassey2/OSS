@@ -58,7 +58,7 @@ int main(void) {
 	UART0_TxPoll("\n\rEntering Main Loop");
   while(1) {
 			alertScan = false;
-			scanMatrix(scanningMatrix);
+                                                                                                                             			scanMatrix(scanningMatrix);
 			
 			UART0_TxPoll("\n\rScanning Matrix Results...");
 			for (i = 0; i < NUM_ROWS; i++) {

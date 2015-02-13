@@ -13,10 +13,10 @@
 #define AUDIO_OUT PIN_6
 
 // Below we define GPIO for scanning matrix 
-// PD[0:3] & PD[6] are rows and will be the outputs
+// PD[7], PD[1:3], & PD[6] are rows and will be the outputs
 // PE[0:4] are cols and will be the inputs
 // the lower pins match the earlier cols/rows ie PE0 is col 1
-#define ROW1 PIN_0
+#define ROW1 PIN_7 | PIN_0
 #define ROW2 PIN_1
 #define ROW3 PIN_2
 #define ROW4 PIN_3

@@ -25,7 +25,7 @@ void scanMatrix(bool matrix[NUM_ROWS][NUM_COLS]) {
 				break;
 		}
 		//set all pins low then set our new one high
-		GPIO_PORTD_DATA_R &= ~ROWS;
+		GPIO_PORTD_DATA_R = 0;
 		GPIO_PORTD_DATA_R |= row;
 			
 		for (j =0; j < NUM_COLS; j++) {
@@ -46,7 +46,7 @@ void scanMatrix(bool matrix[NUM_ROWS][NUM_COLS]) {
 							col = COL5;
 							break;
 					}
-					if (GPIO_PORTE_DATA_R & col) {
+					if (GPIO_PORTE_DATA_R & (1 << col)) {
 						matrix[i][j] = true;
 					} else {
 						matrix[i][j] = false;

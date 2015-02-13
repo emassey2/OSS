@@ -34,14 +34,7 @@ void initPWM() {
 	
 	SYSCTL_RCGC0_R |= SYSCTL_RCGC0_PWM0;				// enable PWM CGR
 	for(i = 0; i < 10; i++);	
-	
-	// PORTB already enabled
-	
-	GPIO_PORTD_DATA_R &= ~ROWS;
-	if (!GPIO_PORTE_DATA_R & 1) {
-		UART0_TxPoll("\n\rPORT B");
-	}
-	
+
 	// Pin6 on portB is enabled in GPIO.c
 	
 	//SYSCTL_RCC_R |= SYSCTL_RCC_USEPWMDIV;			// enable the PWM divider
