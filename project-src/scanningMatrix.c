@@ -1,9 +1,10 @@
 #include "inc/scanningMatrix.h"
+#include "inc/UART.h"
 
 // send output on each row one at a time
 // for ever output scan every input to detect key presses
 void scanMatrix(bool matrix[NUM_ROWS][NUM_COLS]) {
-	uint8_t i, j, col, row;
+	uint8_t i, j, k, col, row;
 	for (i = 0; i < NUM_ROWS; i++) {
 		// janky right now because pins aren't all in series 
 		// this will be fixed when we have a real circuit board
@@ -25,10 +26,13 @@ void scanMatrix(bool matrix[NUM_ROWS][NUM_COLS]) {
 				break;
 		}
 		//set all pins low then set our new one high
-		GPIO_PORTD_DATA_R = 0;
-		GPIO_PORTD_DATA_R |= row;
+		GPIO_PORTD_DATA_R |= ROWS;
+		GPIO_PORTD_DATA_R &= ~row;
+		
+		// wait for a little bit to allow voltage to build
+		for (k = 0; k < 100; k++);
 			
-		for (j =0; j < NUM_COLS; j++) {
+		for (j = 0; j < NUM_COLS; j++) {
 					switch(j) {
 						case 0: 
 							col = COL1;
@@ -46,7 +50,7 @@ void scanMatrix(bool matrix[NUM_ROWS][NUM_COLS]) {
 							col = COL5;
 							break;
 					}
-					if (GPIO_PORTE_DATA_R & (1 << col)) {
+					if (GPIO_PORTE_DATA_R & col) {
 						matrix[i][j] = true;
 					} else {
 						matrix[i][j] = false;
@@ -54,3 +58,20 @@ void scanMatrix(bool matrix[NUM_ROWS][NUM_COLS]) {
 		}
 	}
 }
+	
+void printMatrix(bool matrix[NUM_ROWS][NUM_COLS]) {
+	uint8_t i, j;
+	UART0_TxPoll("\n\rScanning Matrix Results...");
+		for (i = 0; i < NUM_ROWS; i++) {
+			UART0_TxPoll("\n\r[ ");
+			for (j = 0; j < NUM_COLS; j++) {
+				if (matrix[i][j]) {
+					UART0_TxPoll("1 ");
+				} else {
+					UART0_TxPoll("0 ");
+				}
+			}
+			UART0_TxPoll("]");
+		}
+}
+

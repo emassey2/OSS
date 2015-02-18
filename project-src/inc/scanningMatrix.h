@@ -11,3 +11,4 @@
  * Function Prototypes
  *****************************************************************************/
 void scanMatrix(bool matrix[NUM_ROWS][NUM_COLS]);
+void printMatrix(bool matrix[NUM_ROWS][NUM_COLS]);

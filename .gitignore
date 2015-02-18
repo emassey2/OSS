@@ -243,3 +243,4 @@ pip-log.txt
 *.ipt
 *.lck
 *.gcode
+*.CCS

@@ -30,8 +30,6 @@
 void initPWM() {
 	uint8_t i;
 	
-
-	
 	SYSCTL_RCGC0_R |= SYSCTL_RCGC0_PWM0;				// enable PWM CGR
 	for(i = 0; i < 10; i++);	
 
@@ -43,14 +41,15 @@ void initPWM() {
 	//for(i = 0; i < 10; i++);	
 	
 	PWM0_0_CTL_R	&= ~PWM_0_CTL_ENABLE;				// disable timers in PWM0
-	PWM0_0_CTL_R	&= ~PWM_0_CTL_DBFALLUPD_I;	// disable immedidate updates to parameters
-	PWM0_0_GENA_R |= PWM_0_GENA_ACTLOAD_ONE;	// set output high (1) on load
-	PWM0_0_GENA_R |= PWM_0_GENA_ACTCMPAD_ZERO;// set output low (0) on match?
-	PWM0_0_GENB_R |= PWM_0_GENB_ACTLOAD_ONE;	// set output high (1) on load
-	PWM0_0_GENB_R |= PWM_0_GENB_ACTCMPAD_ZERO;// set output low (0) on match?
+	PWM0_0_CTL_R	= PWM_0_CTL_DBFALLUPD_I;		// enable immedidate updates to parameters
+	PWM0_0_GENA_R |= PWM_0_GENA_ACTLOAD_ONE;	// set output high (1) on load A
+	PWM0_0_GENA_R |= PWM_0_GENA_ACTCMPAD_ZERO;// set output low (0) on match A
+	PWM0_0_GENB_R |= PWM_0_GENB_ACTLOAD_ONE;	// set output high (1) on load B
+	PWM0_0_GENB_R |= PWM_0_GENB_ACTCMPBD_ZERO;// set output low (0) on match B
 	PWM0_0_LOAD_R |= PWM_0_LOAD_VAL;					// set our reload value
 	PWM0_0_CMPA_R |= PWM_CPM_DEFAULT;					// default our duty cycle 0/100
 	PWM0_0_CMPB_R |= PWM_CPM_DEFAULT;					// default our duty cycle 0/100
 	PWM0_0_CTL_R 	|= PWM_0_CTL_ENABLE;				// enable timers in PWM0
 	PWM0_ENABLE_R |= PWM_ENABLE_PWM0EN;				// enable PWM output
+	PWM0_ENABLE_R |= PWM_ENABLE_PWM1EN;
 }

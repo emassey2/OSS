@@ -8,8 +8,8 @@
  * Global Variables
  *****************************************************************************/
  
-volatile uint32_t tword0 = (136902 * 350);
-volatile uint32_t tword1 = (136902 * 440);
+volatile uint32_t tword0 = (136902 * 440);
+volatile uint32_t tword1 = (136902 * 350);
 volatile uint16_t lfsr = 1;
 volatile bool alertScan;
 
@@ -64,7 +64,7 @@ void initTimer1Noise() {
 
 
 void SYSTICKIntHandler() {
-	static uint8_t tickCount;					// increments ever time in the loop. Resets at 80 ~= 10ms
+	static uint32_t tickCount;					// increments ever time in the loop. Resets at 80 ~= 10ms
 	static uint32_t phaseAccum0 = 0;
 	static uint8_t offset0 = 0;
 	static uint32_t phaseAccum1 = 0;
@@ -87,6 +87,7 @@ void SYSTICKIntHandler() {
 	
 	//combine voices (add and shift right one to get a rough average)
 	PWM0_0_CMPA_R = (sine[offset0] + sine[offset1]) >> 1;	// change duty cycle
+	PWM0_0_CMPB_R = sine[offset0];
 }
 
 void TIMER1IntHandler() {

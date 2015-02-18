@@ -4,8 +4,8 @@
 /******************************************************************************
  * Defines
  *****************************************************************************/
- #define PWM_0_LOAD_VAL 255;	// 8bit coutdown 256-1=255
- #define PWM_CPM_DEFAULT 0;	// default to a duty cylce of 0/100
+ #define PWM_0_LOAD_VAL 256;	// 8bit coutdown
+ #define PWM_CPM_DEFAULT 0;		// default to a duty cylce of 0/100
 
 /******************************************************************************
  * Function Prototypes

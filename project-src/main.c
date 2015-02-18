@@ -37,41 +37,27 @@ extern void DisableInterrupts(void);
 //*****************************************************************************
 //*****************************************************************************
 int main(void) {
-	//TEMP PLS REMOVE LATER//
-	uint8_t i, j;
-	//TEMP PLS REMOVE LATER//
   PLL_Init();
 	
 	initPollingUART0();
-	UART0_TxPoll("\n\r\n\r\n\r*****Open Source Synth V.1*****");
-	
+	UART0_TxPoll("\n\r\n\r\n\r*****Open Source Synth V.15*****");
+
 	UART0_TxPoll("\n\rInitializing GPIO Ports...");
-	initGPIOPorts();
-		
+	initGPIOPorts();	
+	
 	UART0_TxPoll("\n\rInitializing PWM Modules...");
 	initPWM();
 	
 	UART0_TxPoll("\n\rInitializing Timers...");
 	initTimers();
-
 	
 	UART0_TxPoll("\n\rEntering Main Loop");
   while(1) {
+		if (alertScan) {
 			alertScan = false;
-                                                                                                                             			scanMatrix(scanningMatrix);
-			
-			UART0_TxPoll("\n\rScanning Matrix Results...");
-			for (i = 0; i < NUM_ROWS; i++) {
-				UART0_TxPoll("\n\r[ ");
-				for (j = 0; j < NUM_COLS; j++) {
-					if (scanningMatrix[i][j]) {
-						UART0_TxPoll("1 ");
-					} else {
-						UART0_TxPoll("0 ");
-					}
-				}
-				UART0_TxPoll("]");
-			}
+			scanMatrix(scanningMatrix);
+			printMatrix(scanningMatrix);
 		}
-  };
+	}
+};
 
