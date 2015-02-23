@@ -10,22 +10,22 @@
  * clock which in our case is the frequesncy of SysTick. and N is the length (bit-width) of 
  * the phase accumulator (32 bits).
  * 
- * The synth is designed to have an 8 octave max range. Therefore our highest frequency will be 7902hz
- * Knowing this we can solve for a theoretical minimum Reload Value to satisfy our reference value
- * Using the equation above: 7902hz = ((2^32 - 1) * ( (80*10^6) / x)) / 2^32
- * Solving for x we find our reload value to be 10124.
- * Thus SysTick has a reload value of 10124 and our clk is 80mhz. 80mhz / 10124 = 7902.02Hz = REFCLK
+ * The synth is optimized for the common case of a max frequency of C5 or 523.251hz.
+ * Knowing this we can solve for a theoretical minimum Systick Reload Value to satisfy our reference clock
+ * Using the equation above: 523.251hz = ((2^32 - 1) * ( (80*10^6) / x)) / 2^32
+ * Solving for x we find our reload value to be 598.
+ * Thus SysTick has a reload value of 598 and our clk is 80mhz. 80mhz / 598 = 133779.2642Hz = REFCLK
  *
- * By changing the tuning word we can achive diffrent frequencies
- * Solving for M we get the equation M = 2^32 * Fout / 7902.02
+ * By changing the tuning word we can achieve different frequencies
+ * Solving for M we get the equation M = 2^32 * Fout / 133779.2642
  *
  * Fout is controlled by the user but we precalculate 2^N / REFCLK to save time
- * Thus our turning word M = 2^32 / 7902.02 * Fout = 543528.1113088 * Fout
+ * Thus our turning word M = 2^32 / 133779.2642 * Fout therfore M = 32104.9 * Fout
+ *
+ * 32104.9 will from here on be refered to as the Tuning Constant or TUNING_CONST
  * 
  * Our DAC is provided using PWM modules in conjunction with the alternate function of pin(s)
  ******************************************************************************************************/
-
-// above is out of date as I am currently trying diffrent values to find best one empirically
 
 void initPWM() {
 	uint8_t i;

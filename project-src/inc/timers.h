@@ -1,12 +1,11 @@
 #include "board_config.h"
-#include <stdbool.h>
 
 
 /******************************************************************************
  * Defines
  *****************************************************************************/
-#define SYS_TICK_RELOAD_VAL (2550-1)	// 80mhz / 2000 = 126.5us
-#define SYS_TICK_RESET_VAL 8000
+#define SYS_TICK_RELOAD_VAL (598-1)	// 80mhz / 598 = 7.475us
+#define SYS_TICK_RESET_VAL 10
 #define TIMER0A_RELOAD_VAL (256-1)	// 80mhz / 256  = 3.2us This is a default val
 #define TIMER1A_RELOAD_VAL 10000 / (60)	// number in () is the freq in hz 
 #define TIMER1A_PRESCALE 8000

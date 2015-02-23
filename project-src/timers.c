@@ -1,6 +1,7 @@
 #include "inc/timers.h"
 #include "inc/defines.h"
 #include "inc/waves.h"
+#include <stdbool.h>
 #include <stdint.h>
 
 
@@ -8,8 +9,10 @@
  * Global Variables
  *****************************************************************************/
  
-volatile uint32_t tword0 = (136902 * 440);
-volatile uint32_t tword1 = (136902 * 350);
+volatile uint32_t tword0 = 0;
+volatile uint32_t tword1 = 0;
+volatile uint32_t tword2 = 0;
+volatile uint32_t tword3 = 0;
 volatile uint16_t lfsr = 1;
 volatile bool alertScan;
 
@@ -28,9 +31,9 @@ void initSysTick() {
 }
 
 void initTimer0PWM() {
-	uint8_t delay;
+	uint8_t i;
 	SYSCTL_RCGCTIMER_R |= SYSCTL_RCGCTIMER_R0;	// enable clock gating reg for timer0
-	delay = SYSCTL_RCGCTIMER_R0;								// wait a cycle for the CGR
+	for (i = 0; i < 1; i++);										// wait a cycle for the CGR
 	TIMER0_CTL_R &= ~TIMER_CTL_TAEN;						// disable timer during setup
 	TIMER0_CFG_R |= TIMER_CFG_16_BIT;						// configure for 16bit mode
 	TIMER0_TAMR_R |= TIMER_TAMR_TAAMS;					// enable timer0 alternate mode
@@ -68,7 +71,11 @@ void SYSTICKIntHandler() {
 	static uint32_t phaseAccum0 = 0;
 	static uint8_t offset0 = 0;
 	static uint32_t phaseAccum1 = 0;
-	static uint8_t offset1 = 0;
+	static uint8_t offset1 = 0;	
+	static uint32_t phaseAccum2 = 0;
+	static uint8_t offset2 = 0;	
+	static uint32_t phaseAccum3 = 0;
+	static uint8_t offset3		= 0;
 	
 	if (SYS_TICK_RESET_VAL > tickCount) {
 		tickCount++;
@@ -77,17 +84,25 @@ void SYSTICKIntHandler() {
 		tickCount = 0;
 	}
 
-	//voice 1
+	//voice 0
 	phaseAccum0 += tword0;						// Increment the Phase Accumulator0
 	offset0 = phaseAccum0 >> 24;  		// use only the upper 8 bits from the phaseAccum0 (256)
 	
-	//voice 2
+	//voice 1
 	phaseAccum1 += tword1;						// Increment the Phase Accumulator0
 	offset1 = phaseAccum1 >> 24;  		// use only the upper 8 bits from the phaseAccum0 (256)
 	
+	//voice 2
+	phaseAccum2 += tword2;						// Increment the Phase Accumulator2
+	offset2 = phaseAccum2 >> 24;  		// use only the upper 8 bits from the phaseAccum2 (256)
+	
+	//voice 3
+	phaseAccum3 += tword3;						// Increment the Phase Accumulator3
+	offset3 = phaseAccum3 >> 24;  		// use only the upper 8 bits from the phaseAccum3 (256)
+	
 	//combine voices (add and shift right one to get a rough average)
-	PWM0_0_CMPA_R = (sine[offset0] + sine[offset1]) >> 1;	// change duty cycle
-	PWM0_0_CMPB_R = sine[offset0];
+	PWM0_0_CMPA_R = (saw[offset0] + square50[offset1]) >> 1;
+	PWM0_0_CMPB_R = saw[offset0];// + square50[offset1]) >> 1;
 }
 
 void TIMER1IntHandler() {

@@ -17,6 +17,9 @@
 //#define AUDIO_OUT_0 PIN_6
 //#define AUDIO_OUT_0 PIN_6
 
+#define TUNING_CONST 32104.9
+#define NO_SOUND 0
+
 // Below we define GPIO for scanning matrix 
 // PD[0:3], & PD[6] are rows and will be the outputs
 // PE[0:4] are cols and will be the inputs
@@ -37,3 +40,21 @@
 
 #define NUM_COLS 5
 #define NUM_ROWS 5
+#define MIN_OCTAVE 0
+#define NUM_OCTAVES 9
+#define KEYS_PER_OCT 12
+
+#define NO_NOTE -1
+#define C  0
+#define CS 1
+#define D  2
+#define DS 3
+#define E  4
+#define F  5
+#define FS 6
+#define G  7
+#define GS 8
+#define A  9
+#define AS 10
+#define B  11
+#define BS 12

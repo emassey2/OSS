@@ -3,11 +3,11 @@
 
 // send output on each row one at a time
 // for ever output scan every input to detect key presses
-void scanMatrix(bool matrix[NUM_ROWS][NUM_COLS]) {
+int8_t scanMatrix(bool matrix[NUM_ROWS][NUM_COLS]) {
 	uint8_t i, j, k, col, row;
+	int8_t keyPressed;
+	keyPressed = -1;
 	for (i = 0; i < NUM_ROWS; i++) {
-		// janky right now because pins aren't all in series 
-		// this will be fixed when we have a real circuit board
 		switch(i) {
 			case 0: 
 				row = ROW1;
@@ -25,6 +25,7 @@ void scanMatrix(bool matrix[NUM_ROWS][NUM_COLS]) {
 				row = ROW5;
 				break;
 		}
+		
 		//set all pins low then set our new one high
 		GPIO_PORTD_DATA_R |= ROWS;
 		GPIO_PORTD_DATA_R &= ~row;
@@ -52,11 +53,14 @@ void scanMatrix(bool matrix[NUM_ROWS][NUM_COLS]) {
 					}
 					if (GPIO_PORTE_DATA_R & col) {
 						matrix[i][j] = true;
+						keyPressed = (i * 5) + j;
 					} else {
 						matrix[i][j] = false;
 					}
 		}
 	}
+	
+	return keyPressed;
 }
 	
 void printMatrix(bool matrix[NUM_ROWS][NUM_COLS]) {

@@ -1,14 +1,19 @@
 #include "board_config.h"
 #include "defines.h"
-#include <stdbool.h>
+#include "note.h"
 
 /******************************************************************************
  * Defines
  *****************************************************************************/
+typedef struct Channel {
+	Note* note;
+	uint8_t* waveTable;
+} Channel;
 
 
 /******************************************************************************
  * Function Prototypes
  *****************************************************************************/
-int8_t scanMatrix(bool matrix[NUM_ROWS][NUM_COLS]);
-void printMatrix(bool matrix[NUM_ROWS][NUM_COLS]);
+void updateNoteKey(Channel* self, int8_t keyNumber);
+
+void updateNoteTuningWord(Channel* self, volatile uint32_t* tuningWord);
