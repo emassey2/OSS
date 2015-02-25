@@ -7,7 +7,7 @@
  *****************************************************************************/
 typedef struct Channel {
 	Note* note;
-	uint8_t* waveTable;
+	uint8_t* waveTable_ref;
 } Channel;
 
 

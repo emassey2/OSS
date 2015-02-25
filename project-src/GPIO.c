@@ -2,7 +2,6 @@
 #include "inc/defines.h"
  
 uint8_t delay;
-uint16_t i;
  
 void initGPIOPorts() {
 	//initGPIOPortA();

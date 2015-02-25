@@ -14,7 +14,13 @@ volatile uint32_t tword1 = 0;
 volatile uint32_t tword2 = 0;
 volatile uint32_t tword3 = 0;
 volatile uint16_t lfsr = 1;
-volatile bool alertScan;
+volatile bool alertScan = false;
+volatile bool alertEffect = false;;
+
+uint8_t* wave0 = sine;
+uint8_t* wave1 = square50;
+uint8_t* wave2 = square50;
+uint8_t* wave3 = square50;
 
 void initTimers() {
 	initSysTick();
@@ -67,7 +73,8 @@ void initTimer1Noise() {
 
 
 void SYSTICKIntHandler() {
-	static uint32_t tickCount;					// increments ever time in the loop. Resets at 80 ~= 10ms
+	static uint32_t sysTickCount;					// increments every time in the loop. Resets at 136 ~= 1ms
+	static uint8_t scanCount;							// increments every sysTickCount reset. Resets at 10 ~= 10ms
 	static uint32_t phaseAccum0 = 0;
 	static uint8_t offset0 = 0;
 	static uint32_t phaseAccum1 = 0;
@@ -77,11 +84,17 @@ void SYSTICKIntHandler() {
 	static uint32_t phaseAccum3 = 0;
 	static uint8_t offset3		= 0;
 	
-	if (SYS_TICK_RESET_VAL > tickCount) {
-		tickCount++;
+	if (SYS_TICK_RESET_VAL > sysTickCount) {
+		sysTickCount++;
 	} else {
-		alertScan = true;
-		tickCount = 0;
+		sysTickCount = 0;
+		alertEffect = true;
+		if (scanCount < SCAN_SCALER) {
+			scanCount++;
+		} else {
+			scanCount = 0;
+			alertScan = true;
+		}
 	}
 
 	//voice 0
@@ -102,7 +115,7 @@ void SYSTICKIntHandler() {
 	
 	//combine voices (add and shift right one to get a rough average)
 	PWM0_0_CMPA_R = (saw[offset0] + square50[offset1]) >> 1;
-	PWM0_0_CMPB_R = saw[offset0];// + square50[offset1]) >> 1;
+	PWM0_0_CMPB_R = wave0[offset0];
 }
 
 void TIMER1IntHandler() {

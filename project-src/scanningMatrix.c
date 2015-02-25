@@ -6,7 +6,7 @@
 int8_t scanMatrix(bool matrix[NUM_ROWS][NUM_COLS]) {
 	uint8_t i, j, k, col, row;
 	int8_t keyPressed;
-	keyPressed = -1;
+	keyPressed = NO_NOTE;
 	for (i = 0; i < NUM_ROWS; i++) {
 		switch(i) {
 			case 0: 
