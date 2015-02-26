@@ -5,11 +5,18 @@
 /******************************************************************************
  * Defines
  *****************************************************************************/
- #define LOOP -2
- #define RELEASE_PT -3
- #define INDEX_OF_RELEASE 126
- #define END -4
- #define EFFECT_SIZE 256
+#define LOOP -2
+#define RELEASE_PT -3
+#define INDEX_OF_RELEASE 126
+#define END -4
+#define EFFECT_SIZE 256
+
+// These might need to be variables some day
+#define ATTACK 25
+#define DECAY 50
+#define SUSTAIN 150
+#define RELEASE 254
+#define SUSTAIN_VOL .5
  
  
  

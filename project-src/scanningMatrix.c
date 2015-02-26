@@ -31,7 +31,7 @@ int8_t scanMatrix(bool matrix[NUM_ROWS][NUM_COLS]) {
 		GPIO_PORTD_DATA_R &= ~row;
 		
 		// wait for a little bit to allow voltage to build
-		for (k = 0; k < 100; k++);
+		for (k = 0; k < 20; k++);
 			
 		for (j = 0; j < NUM_COLS; j++) {
 					switch(j) {

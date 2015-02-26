@@ -3,10 +3,17 @@
 void updateKey(Note* self, int8_t keyNumber) {
 	static int8_t lastKeyNumber = NO_NOTE;
 	
-	if (lastKeyNumber != keyNumber && keyNumber != NO_NOTE) {
-		// case where new key is pressed while another key was being held
+	//check to see if the keys have changed
+	if (lastKeyNumber != keyNumber) {
+		if (lastKeyNumber != NO_NOTE) {
+			// case where new key is pressed while another key was being held
+			self->effects.volumeCounter = self->effects.volumeLoopPos;
+		} else {
+			// case where we go from not keys being pressed to one is pressed
+			self->effects.volumeCounter = 0;
+		}
+		// a key is pressed so we need to make sure we play/continue to play a note
 		self->stillPlaying = true;
-		self->effects.volumeCounter = self->effects.volumeLoopPos;
 	}
 	lastKeyNumber = keyNumber;
 	getKey(self->key, keyNumber);
@@ -21,18 +28,26 @@ void updateTuningWord(Note* self, volatile uint32_t* tuningWord) {
 	keyOct = self->key->octave;
 	keyLetter = self->key->letter;
 	
-	// check to make sure we still need to play a note
-	if (!self->stillPlaying) {
-		*tuningWord = NO_SOUND;
-	} else if(keyLetter == NO_NOTE) { // loop & release stuff
-		// key isn't held but we need to continue the note. Reassign values and wait for stillPlaying to be false
-		keyOct = lastKeyOct;
-		keyLetter = lastKeyLetter;
-		*tuningWord = TUNING_CONST * noteFreq[lastKeyOct + 4][lastKeyLetter];
-	} else if (keyLetter != lastKeyLetter || keyOct != lastKeyOct) {
-		*tuningWord = TUNING_CONST * noteFreq[self->key->octave + 4][self->key->letter];
+	// check if we need to account for effects
+	if (self->effects.enabled) {
+		// check to make sure we still need to play a note
+		if (!self->stillPlaying) {
+			*tuningWord = NO_SOUND;
+		} else if(keyLetter == NO_NOTE) { // loop & release stuff
+			// key isn't held but we need to continue the note. Reassign values and wait for stillPlaying to be false
+			keyOct = lastKeyOct;
+			keyLetter = lastKeyLetter;
+			*tuningWord = TUNING_CONST * noteFreq[lastKeyOct + 4][lastKeyLetter];
+		} else if (keyLetter != lastKeyLetter || keyOct != lastKeyOct) {
+			*tuningWord = TUNING_CONST * noteFreq[self->key->octave + 4][self->key->letter];
+		}
+	} else {
+		if (keyLetter == NO_NOTE) {
+			*tuningWord = NO_SOUND;
+		} else {
+			*tuningWord = TUNING_CONST * noteFreq[self->key->octave + 4][self->key->letter];
+		}
 	}
-	
 	lastKeyOct = keyOct;	
 	lastKeyLetter = keyLetter;
 }
@@ -95,11 +110,11 @@ void updateEffects(Note* self, uint8_t* refTable) {
 }
 
 void adjustVolume(Note* self, uint8_t* refTable) {
-	uint8_t i;
+	uint16_t i;
 	float volumeScaler;
 	volumeScaler = self->effects.volume[self->effects.volumeCounter];
 	
-	for (i = 0; i < EFFECT_SIZE - 1; i++) {
+	for (i = 0; i < EFFECT_SIZE; i++) {
 		self->waveTable[i] = (uint8_t)(volumeScaler * refTable[i]);
 	}
 }

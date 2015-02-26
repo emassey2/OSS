@@ -57,7 +57,7 @@ int main(void) {
   PLL_Init();
 	
 	initPollingUART0();
-	UART0_TxPoll("\n\r\n\r\n\r*****Chiposizer V.2*****");
+	UART0_TxPoll("\n\r\n\r\n\r*****Chiposizer V.3****");
 
 	UART0_TxPoll("\n\rInitializing GPIO Ports...");
 	initGPIOPorts();	
@@ -73,7 +73,6 @@ int main(void) {
 	
 	UART0_TxPoll("\n\rEntering Main Loop");
   while(1) {
-		//alertEffect= false; nev
 		if (alertScan) {
 			alertScan = false;
 			keyNumber = scanMatrix(scanningMatrix);
@@ -88,15 +87,9 @@ int main(void) {
 	}
 };
 
-#define ATTACK 25
-#define DECAY 50
-#define SUSTAIN 150
-#define RELEASE 254
-#define SUSTAIN_VOL .75
-
 void initChannels(Channel* channel) {
 	channel = &testChannel;
-	channel->waveTable_ref = &square50[0];
+	channel->waveTable_ref = &sine[0];
 	
 	channel->note = &testNote;
 	channel->note->waveTable = testWaveTable;
@@ -110,27 +103,5 @@ void initChannels(Channel* channel) {
 	channel->note->effects.volumeCounter = 0; 
 	channel->note->effects.volumeLoopPos = 0;
 
-	for (i = 0; i < EFFECT_SIZE; i++){
-		
-		channel->note->effects.volume[i] = 100; 
-		
-		if (i < ATTACK) {
-			channel->note->effects.volume[i] = 1 / (ATTACK / (float)i);
-		} else if (i < DECAY) {
-			channel->note->effects.volume[i] = 1 - ((1 - SUSTAIN_VOL) * (((float)i - ATTACK)) / (DECAY - ATTACK));
-		} else if (i < SUSTAIN) {
-			channel->note->effects.volume[i] = SUSTAIN_VOL;
-		} else if (i < RELEASE) {
-			channel->note->effects.volume[i] = SUSTAIN_VOL - (SUSTAIN_VOL * (((float)i - SUSTAIN)/(RELEASE - SUSTAIN)));
-		} else {
-			channel->note->effects.volume[i] = 0;
-		}
-		
-			
-	}
-		channel->note->effects.volumeLoopPos = DECAY;
-		channel->note->effects.volume[DECAY] = LOOP;
-		channel->note->effects.volume[SUSTAIN] = RELEASE_PT;
-		channel->note->effects.volumeReleasePos = SUSTAIN;
-		channel->note->effects.volume[RELEASE+1] = END;
+	initADSREnvelope(channel);
 }

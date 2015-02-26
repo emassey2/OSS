@@ -17,3 +17,5 @@ typedef struct Channel {
 void updateNoteKey(Channel* self, int8_t keyNumber);
 
 void updateNoteTuningWord(Channel* self, volatile uint32_t* tuningWord);
+
+void initADSREnvelope(Channel* self);
