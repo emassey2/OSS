@@ -33,6 +33,13 @@ extern uint8_t* wave2;
 extern uint8_t* wave3;
 bool scanningMatrix[NUM_ROWS][NUM_COLS];
 
+
+
+extern volatile uint8_t testIndex;
+
+
+
+
 Channel testChannel;
 Note testNote;
 Key testKey;
@@ -78,6 +85,13 @@ int main(void) {
 			keyNumber = scanMatrix(scanningMatrix);
 			updateKey(testChannel.note, keyNumber);
 			updateTuningWord(testChannel.note, &tword0);
+			
+			if (testChannel.note->key->letter != NO_NOTE) {
+				tword3 = 1;
+				testIndex = keyNumber % NOISE_FREQS;
+			} else {
+				tword3 = 0;
+			}
 		}
 		if (alertEffect) {
 			alertEffect = false;
@@ -89,7 +103,7 @@ int main(void) {
 
 void initChannels(Channel* channel) {
 	channel = &testChannel;
-	channel->waveTable_ref = &sine[0];
+	channel->waveTable_ref = &square50[0];
 	
 	channel->note = &testNote;
 	channel->note->waveTable = testWaveTable;

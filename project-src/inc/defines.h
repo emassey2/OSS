@@ -43,6 +43,7 @@
 #define MIN_OCTAVE 0
 #define NUM_OCTAVES 9
 #define KEYS_PER_OCT 12
+#define NOISE_FREQS 16
 
 #define NO_NOTE -1
 #define C  0
