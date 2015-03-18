@@ -8,14 +8,16 @@
 #define LOOP -2
 #define RELEASE_PT -3
 #define INDEX_OF_RELEASE 126
+#define INDEX_OF_LOOP 126
+#define INDEX_OF_END RELASE+1
 #define END -4
 #define EFFECT_SIZE 256
 
 // These might need to be variables some day
-#define ATTACK 25
+#define ATTACK 0
 #define DECAY 50
-#define SUSTAIN 150
-#define RELEASE 254
+#define SUSTAIN 100//150
+#define RELEASE 150//254
 #define SUSTAIN_VOL .5
  
  
@@ -39,7 +41,5 @@ typedef struct Effects {
 	
 	float volume[EFFECT_SIZE];
 	int16_t arpeggio[EFFECT_SIZE];
-	
-
 	
 }Effects;

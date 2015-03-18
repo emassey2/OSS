@@ -9,7 +9,7 @@
 #define SCAN_SCALER	10
 #define TIMER0A_RELOAD_VAL (256-1)	// 80mhz / 256  = 3.2us This is a default val
 #define TIMER1A_RELOAD_VAL 10000 / noisePeriod[0]	// number in () is the freq in hz 
-#define TIMER1A_PRESCALE 8000
+#define TIMER1A_PRESCALE 7999
 #define bit0 (1 << 0)
 #define bit1 (1 << 1)
 #define bit15M ~(1 << 15)

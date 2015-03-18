@@ -80,11 +80,11 @@ void SYSTICKIntHandler() {
 	static uint32_t phaseAccum0 = 0;
 	static uint8_t offset0 = 0;
 	static uint32_t phaseAccum1 = 0;
-	static uint8_t offset1 = 0;	
+	static uint8_t offset1 = 0;
 	static uint32_t phaseAccum2 = 0;
-	static uint8_t offset2 = 0;	
+	static uint8_t offset2 = 0;
 	static uint32_t phaseAccum3 = 0;
-	static uint8_t offset3		= 0;
+	static uint8_t offset3 = 0;
 	
 	if (SYS_TICK_RESET_VAL > sysTickCount) {
 		sysTickCount++;
@@ -117,8 +117,8 @@ void SYSTICKIntHandler() {
 	
 	//combine voices (add and shift right one to get a rough average)
 	PWM0_0_CMPA_R = (saw[offset0] + square50[offset1]) >> 1;
-	if (newBit && tword3) {
-		PWM0_0_CMPB_R = 255;	//wave0[offset0];
+	if (newBit && (tword3 != NO_NOTE)) {
+		PWM0_0_CMPB_R = wave0[0];
 	} else {
 		PWM0_0_CMPB_R = 0;
 	}
@@ -128,7 +128,7 @@ void SYSTICKIntHandler() {
 // modeled after the NES's 2A03
 void TIMER1IntHandler() {
 	static uint16_t lfsr = 1;
-	static bool mode = 1;
+	static bool mode = 0;
 	TIMER1_ICR_R = TIMER_ICR_TATOCINT;	// acknowledge timer1A
 		
 		// if mode is set 31 or 93 steps long (depends on where lfsr was) - metalic sound
@@ -148,6 +148,6 @@ void TIMER1IntHandler() {
 			lfsr = ((lfsr >> 1) & ~(0x4000));
 		}
 		
-		// set our new period
-		TIMER1_TAILR_R = 10000 / noisePeriod[testIndex];
+		// set our new period and make sure we don't go out of array bounds
+		TIMER1_TAILR_R = (10000 / noisePeriod[tword3 % NOISE_FREQS])-1;
 }

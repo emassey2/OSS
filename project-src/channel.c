@@ -31,5 +31,5 @@ void initADSREnvelope(Channel* self) {
 	self->note->effects.volume[DECAY] = LOOP;
 	self->note->effects.volume[SUSTAIN] = RELEASE_PT;	// release point is right after the end of the sustain
 	self->note->effects.volumeReleasePos = SUSTAIN;
-	self->note->effects.volume[RELEASE+1] = END;
+	self->note->effects.volume[DECAY] = END;
 }

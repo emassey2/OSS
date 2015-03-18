@@ -4,14 +4,15 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include "inc/channel.h"
 #include "inc/defines.h"
-#include "inc/UART.h"
 #include "inc/GPIO.h"
-#include "inc/timers.h"
+#include "inc/linkedList.h"
 #include "inc/PWM.h"
 #include "inc/scanningMatrix.h"
-#include "inc/channel.h"
+#include "inc/timers.h"
 #include "inc/tm4c123gh6pm.h"
+#include "inc/UART.h"
 
 /******************************************************************************
  * Forward Decleration
@@ -31,14 +32,8 @@ extern uint8_t* wave0;
 extern uint8_t* wave1;
 extern uint8_t* wave2;
 extern uint8_t* wave3;
+
 bool scanningMatrix[NUM_ROWS][NUM_COLS];
-
-
-
-extern volatile uint8_t testIndex;
-
-
-
 
 Channel testChannel;
 Note testNote;
@@ -46,10 +41,16 @@ Key testKey;
 uint8_t testWaveTable[WAVE_TABLE_SIZE];
 Effects testEffect;
 
+list testList;
+bool recordLoop;
+uint32_t recordLoopNum;
+node *cur;
+
 int8_t keyNumber;
 uint32_t waveCount = 0;
 
 uint16_t i;
+int8_t* keyNumberPtr;
 
 //*****************************************************************************
 // External Functions
@@ -79,19 +80,34 @@ int main(void) {
 	initChannels(&testChannel);
 	
 	UART0_TxPoll("\n\rEntering Main Loop");
-  while(1) {
+	
+	recordLoopNum = 0;
+  while(1) { 
+
 		if (alertScan) {
 			alertScan = false;
-			keyNumber = scanMatrix(scanningMatrix);
-			updateKey(testChannel.note, keyNumber);
-			updateTuningWord(testChannel.note, &tword0);
-			
-			if (testChannel.note->key->letter != NO_NOTE) {
-				tword3 = 1;
-				testIndex = keyNumber % NOISE_FREQS;
-			} else {
-				tword3 = 0;
+			if (recordLoopNum < 100) {
+				recordLoopNum++;
+			} else if (!recordLoop) {
+				recordLoop = true;
+				cur = testList.head;
+				UART0_TxPoll("\n\rBegin Record Loop");
 			}
+			if (!recordLoop) {
+				keyNumber = scanMatrix(scanningMatrix);
+				keyNumberPtr = malloc(sizeof(int8_t));
+				*keyNumberPtr = keyNumber;
+				add(&testList, keyNumberPtr);
+			} else {
+				keyNumber = *((int8_t*) cur->data);
+				if (cur == testList.tail) {
+					cur = testList.head;
+				} else {
+					cur = cur->next;
+				}
+			}
+			updateKey(testChannel.note, keyNumber);
+			updateTuningWord(testChannel.note, &tword3);
 		}
 		if (alertEffect) {
 			alertEffect = false;
@@ -103,10 +119,11 @@ int main(void) {
 
 void initChannels(Channel* channel) {
 	channel = &testChannel;
-	channel->waveTable_ref = &square50[0];
+	channel->waveTable_ref = &noise[0];
 	
 	channel->note = &testNote;
 	channel->note->waveTable = testWaveTable;
+	channel->note->isNoise = true;
 	
 	channel->note->key = &testKey;
 	channel->note->key->letter = NO_NOTE;
