@@ -1,21 +1,26 @@
+#ifndef __LINKEDLIST_H__
+#define __LINKEDLIST_H__
+
 #include <stdbool.h>
 #include <stdint.h>
 
-typedef struct node {
+typedef struct Node {
     void *data;
-    struct node *next;
-} node;
+    struct Node *next;
+} Node;
 
-typedef struct list {
-	struct node *head;
-	struct node *tail;
-} list;
+typedef struct List {
+	struct Node *head;
+	struct Node *tail;
+} List;
 
-// adds an element to the end of the list. returns -1 on fail
-int8_t add(list *list, void *newObject);
+// adds an element to the end of the List. returns -1 on fail
+int8_t add(List *list, void *newObject);
 
-// remvoes an element from the end of the list. returns -1 on fail
-int8_t removeEnd(list *list);
+// remvoes an element from the end of the List. returns -1 on fail
+int8_t removeEnd(List *list);
 
-// deletes all nodes in a linked list. returns -1 on fail
-int8_t clear(list *list);
+// deletes all Nodes in a linked List. returns -1 on fail
+int8_t clear(List *list);
+
+#endif // __LINKEDLIST_H__

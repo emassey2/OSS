@@ -117,11 +117,12 @@ void SYSTICKIntHandler() {
 	
 	//combine voices (add and shift right one to get a rough average)
 	PWM0_0_CMPA_R = (saw[offset0] + square50[offset1]) >> 1;
-	if (newBit && (tword3 != NO_NOTE)) {
+	PWM0_0_CMPB_R = wave0[offset0];
+	/*if (newBit && (tword3 != NO_NOTE)) {
 		PWM0_0_CMPB_R = wave0[0];
 	} else {
 		PWM0_0_CMPB_R = 0;
-	}
+	}*/
 }
 
 // Software based linear feedback shift register (lfsr)

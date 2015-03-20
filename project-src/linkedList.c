@@ -1,27 +1,28 @@
+
 #include <stddef.h>
 #include <stdlib.h>
 #include "inc/linkedList.h"
 
-// adds an element to the end of the list
-int8_t add(list *list, void *data) {
-	node *newNode;
+// adds an element to the end of the List
+int8_t add(List *list, void *data) {
+	Node *newNode;
 	
 	// validate params
 	if (list == NULL) {
 		return -1;
 	}
 	
-	// allocate space for our new node
-	newNode = malloc(sizeof(node));
+	// allocate space for our new Node
+	newNode = malloc(sizeof(Node));
 	newNode->data = data;
 	
-	// add our new node to our list
+	// add our new Node to our List
 	if (list->head == NULL) {
-		// case where there are no elements in list
+		// case where there are no elements in List
 		list->head = newNode;
 		list->tail = newNode;
 	} else if (list->tail != NULL) {
-		// generic case. i.e. one or more nodes present
+		// generic case. i.e. one or more Nodes present
 		list->tail->next = newNode;
 		list->tail = newNode;
 	} else {
@@ -32,9 +33,9 @@ int8_t add(list *list, void *data) {
 	return 0;
 }
 
-// removes an element from the end of the list
-int8_t removeEnd(list *list) {
-	node *cur;
+// removes an element from the end of the List
+int8_t removeEnd(List *list) {
+	Node *cur;
 		
 	// validate params
 	if (list == NULL) {
@@ -43,7 +44,7 @@ int8_t removeEnd(list *list) {
 		return -1;
 	}
 	
-	// edge case where there is only one element in the list
+	// edge case where there is only one element in the List
 	if (list->head->next == NULL) {
 		free(list->head->data);
 		free(list->head);
@@ -55,23 +56,23 @@ int8_t removeEnd(list *list) {
 		//start at head
 		cur = list->head;
 		
-		// two or more nodes present
+		// two or more Nodes present
 		while (cur->next->next != NULL) {
-			// loop until we find the second to last node
+			// loop until we find the second to last Node
 			cur = cur->next;
 		}
 		
 		free(cur->next->data);	// free our data
-		free(cur->next);				// free our node
-		list->tail = cur;				// set tail to new last node
+		free(cur->next);				// free our Node
+		list->tail = cur;				// set tail to new last Node
 		cur->next = NULL;
 	}
 	
 	return 0;
 }
 
-// deletes all nodes in a linked list. returns number of elements deleted else -1.
-int8_t clear(list *list) {
+// deletes all Nodes in a linked List. returns number of elements deleted else -1.
+int8_t clear(List *list) {
 	int8_t retVal;
 	uint8_t count = 0;
 	

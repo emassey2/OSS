@@ -17,7 +17,7 @@
 /******************************************************************************
  * Forward Decleration
  *****************************************************************************/
-void initChannels(Channel* channel);
+void initChannel(Channel** channel, uint8_t* waveTableRef);
 
 /******************************************************************************
  * Global Variables
@@ -28,26 +28,37 @@ extern volatile uint32_t tword0;
 extern volatile uint32_t tword1;
 extern volatile uint32_t tword2;
 extern volatile uint32_t tword3;
+extern volatile uint32_t tword4;
+extern volatile uint32_t tword5;
 extern uint8_t* wave0;
 extern uint8_t* wave1;
 extern uint8_t* wave2;
 extern uint8_t* wave3;
+extern uint8_t* wave4;
+extern uint8_t* wave5;
+
+Channel* ch0;
+Channel* ch1;
+Channel* ch2;
+Channel* ch3;
+Channel* ch4;
+Channel* ch5;
+
 
 bool scanningMatrix[NUM_ROWS][NUM_COLS];
 
-Channel testChannel;
-Note testNote;
-Key testKey;
+Channel* testChannel;
+Note* testNote;
+Key* testKey;
 uint8_t testWaveTable[WAVE_TABLE_SIZE];
 Effects testEffect;
 
-list testList;
+List testList;
 bool recordLoop;
 uint32_t recordLoopNum;
-node *cur;
+Node *cur;
 
 int8_t keyNumber;
-uint32_t waveCount = 0;
 
 uint16_t i;
 int8_t* keyNumberPtr;
@@ -65,7 +76,7 @@ int main(void) {
   PLL_Init();
 	
 	initPollingUART0();
-	UART0_TxPoll("\n\r\n\r\n\r*****Chiposizer V.3****");
+	UART0_TxPoll("\n\r\n\r\n\r*****Chiposizer V.5****");
 
 	UART0_TxPoll("\n\rInitializing GPIO Ports...");
 	initGPIOPorts();	
@@ -77,7 +88,7 @@ int main(void) {
 	initTimers();
 	
 	UART0_TxPoll("\n\rInitializing Channels...");
-	initChannels(&testChannel);
+	initChannel(&testChannel, triangle);
 	
 	UART0_TxPoll("\n\rEntering Main Loop");
 	
@@ -86,7 +97,7 @@ int main(void) {
 
 		if (alertScan) {
 			alertScan = false;
-			if (recordLoopNum < 100) {
+			if (recordLoopNum < 1000) {
 				recordLoopNum++;
 			} else if (!recordLoop) {
 				recordLoop = true;
@@ -106,33 +117,13 @@ int main(void) {
 					cur = cur->next;
 				}
 			}
-			updateKey(testChannel.note, keyNumber);
-			updateTuningWord(testChannel.note, &tword3);
+			updateKey(testChannel->note, keyNumber);
+			updateTuningWord(testChannel->note, &tword0);
 		}
 		if (alertEffect) {
 			alertEffect = false;
-			updateEffects(testChannel.note, testChannel.waveTable_ref);
-			wave0 = testChannel.note->waveTable;
+			updateEffects(testChannel->note, testChannel->waveTable_ref);
+			wave0 = testChannel->note->waveTable;
 		}
 	}
 };
-
-void initChannels(Channel* channel) {
-	channel = &testChannel;
-	channel->waveTable_ref = &noise[0];
-	
-	channel->note = &testNote;
-	channel->note->waveTable = testWaveTable;
-	channel->note->isNoise = true;
-	
-	channel->note->key = &testKey;
-	channel->note->key->letter = NO_NOTE;
-	channel->note->key->octave = MIN_OCTAVE + 2;
-	
-	channel->note->effects.enabled = true;
-	channel->note->effects.volumeEnabled = true;
-	channel->note->effects.volumeCounter = 0; 
-	channel->note->effects.volumeLoopPos = 0;
-
-	initADSREnvelope(channel);
-}

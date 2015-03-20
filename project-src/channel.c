@@ -1,4 +1,47 @@
+#include <stdlib.h>
 #include "inc/channel.h"
+#include "inc/linkedList.h"
+
+
+void initChannel(Channel** channel, uint8_t* waveTableRef) {
+	VolumeEff *volumeEff;
+	
+	*channel = malloc(sizeof(Channel));
+	(*channel)->waveTable_ref = waveTableRef;
+	
+	(*channel)->note = malloc(sizeof(Note));
+	(*channel)->note->waveTable = malloc(sizeof(uint8_t [WAVE_TABLE_SIZE]));
+	(*channel)->note->isNoise = false;
+	
+	(*channel)->note->key = malloc(sizeof(Key));
+	(*channel)->note->key->letter = NO_NOTE;
+	(*channel)->note->key->octave = MIN_OCTAVE + 2;
+	
+	(*channel)->note->effects->enabled = true;
+	(*channel)->note->effects->volumeEnabled = true;
+	(*channel)->note->effects->released = true; 
+	(*channel)->note->effects->volumeList = malloc(sizeof(List));
+	(*channel)->note->effects->volumeCur = malloc(sizeof(Node));
+	(*channel)->note->effects->volumeLoopPos = malloc(sizeof(Node));
+	(*channel)->note->effects->volumeReleasePos = malloc(sizeof(Node));
+	
+	volumeEff = malloc(sizeof(VolumeEff));
+	volumeEff->duration = 100;
+	volumeEff->volume = 1;
+	volumeEff->marker = 0;
+	add((*channel)->note->effects->volumeList, volumeEff);
+	
+
+	initADSREnvelope((*channel));
+}
+
+void initADSREnvelope(Channel* self) {
+	
+}
+
+
+
+/* Sad to see an old function go
 
 void initADSREnvelope(Channel* self) {
 	uint32_t i;
@@ -33,3 +76,4 @@ void initADSREnvelope(Channel* self) {
 	self->note->effects.volumeReleasePos = SUSTAIN;
 	self->note->effects.volume[DECAY] = END;
 }
+*/

@@ -9,9 +9,9 @@
  *****************************************************************************/
 typedef struct Note {
 	Key* key;
-	Effects effects;
+	Effects* effects;
 	uint8_t* waveTable;
-	bool stillPlaying;
+	bool stillPlaying;			// if we need to continue playing after a key is released
 	bool isNoise;
 }Note;
 
@@ -21,3 +21,4 @@ void updateWaveTable(Note* self, uint8_t* waveTable);
 void updateEffects(Note* self, uint8_t* refTable);
 void adjustVolume(Note* self, uint8_t* refTable);
 void updateNoiseTWord(uint8_t keyOct, int8_t keyLetter, volatile uint32_t* tuningWord);
+void updateVolume(Note* self);
