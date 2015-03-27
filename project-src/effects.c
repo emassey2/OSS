@@ -1,5 +1,15 @@
 #include "inc/effects.h"
+#include <stdlib.h>
 
+// returns a pointer to the new VolumeEff
+VolumeEff* newVolumeEff(float volume, uint32_t duration, char marker) {
+	VolumeEff* volumeEff = malloc(sizeof(VolumeEff));
+	volumeEff->volume = volume;
+	volumeEff->duration = duration;
+	volumeEff->marker = marker;
+	
+	return volumeEff;
+}
 // may not need this method anymore
 Node* findMarker(List *list, char marker) {
 	Node *curNode;

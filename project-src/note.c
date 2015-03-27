@@ -84,7 +84,7 @@ void updateTuningWord(Note* self, volatile uint32_t* tuningWord) {
 	lastKeyLetter = keyLetter;
 }
 
-void updateWaveTable(Note* self, uint8_t* waveTable) {
+void updateWaveTable(Note* self, int8_t* waveTable) {
 	waveTable = self->waveTable;
 }
 
@@ -98,16 +98,11 @@ void updateWaveTable(Note* self, uint8_t* waveTable) {
  *       |      ^
  * >-----L------R------E
  */
-void updateEffects(Note* self, uint8_t* refTable) {
-	
+void updateEffects(Note* self, int8_t* refTable) {
 	if (self->effects->volumeEnabled && self->stillPlaying) {
 		//first we adjust our volume and then we increment our state
 		adjustVolume(self, refTable);
-		
-		// check if we need to move to the next state
-		if (updateVolumeState(self->effects)) {
-			updateVolume(self);
-		}
+		updateVolume(self);
 	}
 }
 	
@@ -116,9 +111,12 @@ void updateVolume(Note* self) {
 	switch(((VolumeEff*)self->effects->volumeCur->data)->marker) {
 		
 		case LOOP_MARKER:	
-			// we see the loop marker so we save it and increment the counter
+			// we see the loop marker so we save it off
 			self->effects->volumeLoopPos = self->effects->volumeCur;
-			self->effects->volumeCur = self->effects->volumeCur->next;
+			// update our waveTable and increment the counter by one
+			if (updateVolumeState(self->effects)) {
+				self->effects->volumeCur = self->effects->volumeCur->next;
+			}
 			break;
 		
 		case RELEASE_MARKER: 
@@ -127,8 +125,11 @@ void updateVolume(Note* self) {
 				self->effects->volumeReleasePos = self->effects->volumeCur;
 				self->effects->volumeCur = self->effects->volumeLoopPos;
 			} else {
-				// if the key is no longer pressed go forward with the release
-				self->effects->volumeCur = self->effects->volumeCur->next;
+				//proceed as normal
+				// update our waveTable and increment the counter by one
+				if (updateVolumeState(self->effects)) {
+					self->effects->volumeCur = self->effects->volumeCur->next;
+				}
 			}
 			break;
 		
@@ -140,12 +141,12 @@ void updateVolume(Note* self) {
 		
 		default:
 			// make sure we still holding the key
-			if (self->key->letter != NO_NOTE) {
+			// or key isn't pressed and we are passed/at the release point so just keep going
+			if (self->key->letter != NO_NOTE || self->effects->released) {
 				// update our waveTable and increment the counter by one
-				self->effects->volumeCur = self->effects->volumeCur->next;
-			} else if (self->effects->released) {
-				// key isn't pressed and we are passed the release point so just keep going
-				self->effects->volumeCur = self->effects->volumeCur->next;
+				if (updateVolumeState(self->effects)) {
+					self->effects->volumeCur = self->effects->volumeCur->next;
+				}
 			} else {
 				// key isn't pressed and we need to skip to release point
 				self->effects->volumeCur = self->effects->volumeReleasePos;
@@ -155,14 +156,16 @@ void updateVolume(Note* self) {
 	}
 }
 
-void adjustVolume(Note* self, uint8_t* refTable) {
+void adjustVolume(Note* self, int8_t* refTable) {
 	uint16_t i;
-	float volumeScaler;
+	static float volumeScaler;
+	
 	volumeScaler = ((VolumeEff*)self->effects->volumeCur->data)->volume;
 	
 	for (i = 0; i < EFFECT_SIZE; i++) {
-		self->waveTable[i] = (uint8_t)(volumeScaler * refTable[i]);
+		self->workingWaveTable[i] = (uint8_t)(volumeScaler * refTable[i]);
 	}
+
 }
 
 void updateNoiseTWord(uint8_t keyOct, int8_t keyLetter, volatile uint32_t* tuningWord) {

@@ -3,6 +3,37 @@
 #include <stdlib.h>
 #include "inc/linkedList.h"
 
+//returns a pointer to a new Node
+Node* newNode() {
+	Node *node;
+	node = malloc(sizeof(Node));
+	
+	if (node == NULL) {
+		return NULL;
+	}
+	
+	node->next = NULL;
+	node->data = NULL;
+	
+	return node;
+}
+
+//returns a pointer to a new List
+List* newList() {
+	List *list;
+	list = malloc(sizeof(List));
+	
+	if (list == NULL) {
+		return NULL;
+	}
+	
+	list->head = NULL;
+	list->tail = NULL;
+	
+	return list;
+}
+	
+
 // adds an element to the end of the List
 int8_t add(List *list, void *data) {
 	Node *newNode;

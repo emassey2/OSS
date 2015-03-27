@@ -7,7 +7,7 @@
  *****************************************************************************/
 typedef struct Channel {
 	Note* note;
-	uint8_t* waveTable_ref;
+	int8_t* waveTable_ref;
 } Channel;
 
 
@@ -18,6 +18,6 @@ void updateNoteKey(Channel* self, int8_t keyNumber);
 
 void updateNoteTuningWord(Channel* self, volatile uint32_t* tuningWord);
 
-void initChannel(Channel** channel, uint8_t* waveTableRef);
+void initChannel(Channel** channel, int8_t* waveTableRef);
 	
 void initADSREnvelope(Channel* self);

@@ -14,6 +14,12 @@ typedef struct List {
 	struct Node *tail;
 } List;
 
+//returns a pointer to a new Node
+Node* newNode(void);
+
+//returns a pointer to a new List
+List* newList(void);
+
 // adds an element to the end of the List. returns -1 on fail
 int8_t add(List *list, void *newObject);
 

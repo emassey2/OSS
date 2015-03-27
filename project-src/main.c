@@ -17,25 +17,33 @@
 /******************************************************************************
  * Forward Decleration
  *****************************************************************************/
-void initChannel(Channel** channel, uint8_t* waveTableRef);
+
 
 /******************************************************************************
  * Global Variables
  *****************************************************************************/
+extern volatile bool volumeUpdate;
+
+
 extern volatile bool alertScan;
 extern volatile bool alertEffect;
+extern volatile uint8_t offset0;
 extern volatile uint32_t tword0;
 extern volatile uint32_t tword1;
 extern volatile uint32_t tword2;
 extern volatile uint32_t tword3;
 extern volatile uint32_t tword4;
 extern volatile uint32_t tword5;
-extern uint8_t* wave0;
+extern int8_t* wave0;
 extern uint8_t* wave1;
 extern uint8_t* wave2;
 extern uint8_t* wave3;
 extern uint8_t* wave4;
 extern uint8_t* wave5;
+
+
+
+
 
 Channel* ch0;
 Channel* ch1;
@@ -43,7 +51,6 @@ Channel* ch2;
 Channel* ch3;
 Channel* ch4;
 Channel* ch5;
-
 
 bool scanningMatrix[NUM_ROWS][NUM_COLS];
 
@@ -88,16 +95,19 @@ int main(void) {
 	initTimers();
 	
 	UART0_TxPoll("\n\rInitializing Channels...");
-	initChannel(&testChannel, triangle);
+	initChannel(&testChannel, triangleTest);
 	
 	UART0_TxPoll("\n\rEntering Main Loop");
 	
 	recordLoopNum = 0;
   while(1) { 
-
+		if (alertEffect) {
+			alertEffect = false;
+			updateEffects(testChannel->note, testChannel->waveTable_ref);
+		}
 		if (alertScan) {
 			alertScan = false;
-			if (recordLoopNum < 1000) {
+			/*if (recordLoopNum < 1000) {
 				recordLoopNum++;
 			} else if (!recordLoop) {
 				recordLoop = true;
@@ -116,14 +126,12 @@ int main(void) {
 				} else {
 					cur = cur->next;
 				}
-			}
+			}*/
+			
+			keyNumber = scanMatrix(scanningMatrix);
 			updateKey(testChannel->note, keyNumber);
 			updateTuningWord(testChannel->note, &tword0);
 		}
-		if (alertEffect) {
-			alertEffect = false;
-			updateEffects(testChannel->note, testChannel->waveTable_ref);
-			wave0 = testChannel->note->waveTable;
-		}
+
 	}
 };

@@ -1,6 +1,7 @@
 #include "inc/timers.h"
 #include "inc/defines.h"
 #include "inc/waves.h"
+#include "inc/channel.h"
 #include <stdbool.h>
 #include <stdint.h>
 
@@ -9,6 +10,7 @@
  * Global Variables
  *****************************************************************************/
  
+volatile uint8_t offset0 = 0;
 volatile uint32_t tword0 = 0;
 volatile uint32_t tword1 = 0;
 volatile uint32_t tword2 = 0;
@@ -16,17 +18,23 @@ volatile uint32_t tword3 = 0;
 volatile bool newBit = 0;
 volatile bool alertScan = false;
 volatile bool alertEffect = false;
+volatile bool volumeUpdate = false;
 
 volatile uint8_t testIndex = 0;
 
-uint8_t* wave0 = sine;
+int8_t* wave0 = triangleTest;
 uint8_t* wave1 = square50;
 uint8_t* wave2 = square50;
 uint8_t* wave3 = square50;
 
+
+int8_t* tempPtr;
+
+extern Channel *testChannel;
+
 void initTimers() {
 	initSysTick();
-	//initTimer0PWM();
+	//initTimer0();
 	initTimer1Noise();
 }
 
@@ -38,23 +46,20 @@ void initSysTick() {
 									 NVIC_ST_CTRL_CLK_SRC;
 }
 
-void initTimer0PWM() {
+void initTimer0() {
 	uint8_t i;
 	SYSCTL_RCGCTIMER_R |= SYSCTL_RCGCTIMER_R0;	// enable clock gating reg for timer0
-	for (i = 0; i < 1; i++);										// wait a cycle for the CGR
-	TIMER0_CTL_R &= ~TIMER_CTL_TAEN;						// disable timer during setup
-	TIMER0_CFG_R |= TIMER_CFG_16_BIT;						// configure for 16bit mode
-	TIMER0_TAMR_R |= TIMER_TAMR_TAAMS;					// enable timer0 alternate mode
-	TIMER0_TAMR_R &= ~TIMER_TAMR_TACMR;					// disable capture mode
-	TIMER0_TAMR_R |= TIMER_TAMR_TAMR_PERIOD;		// configure timer0 for periodic mode
-	TIMER0_TAMR_R |= TIMER_TAMR_TAILD;					// enable loading on interval (start of every cycle)
-	TIMER0_TAMR_R |= TIMER_TAMR_TAMRSU;					// same thing but with match register
-	// defaults to output state to not inverted
-	// defaults to prescaler to 0
-	// TIMER0_TAMR_R |= TIMER_TAMR_TAPWMIE;				// enable interrupts
-	TIMER0_TAILR_R = TIMER0A_RELOAD_VAL;					// set period to 256 (0-255)
-	TIMER0_TAMATCHR_R = TIMER0A_RELOAD_VAL >> 1; 	// default duty cycle of 50%
-	TIMER0_CTL_R |= TIMER_CTL_TAEN;								//enable timer
+	for(i = 0; i < 1; i++);									// delay
+	TIMER0_CTL_R &= ~TIMER_CTL_TAEN;				// disable Timer1 during setup
+	TIMER0_CFG_R = TIMER_CFG_16_BIT;				// configure for 16bit timer mode
+	TIMER0_TAMR_R = TIMER_TAMR_TAMR_PERIOD;	// configure for periodic mode
+	TIMER0_TAILR_R = TIMER0A_RELOAD_VAL;		// reload value
+	TIMER0_TAPR_R = TIMER0A_PRESCALE;				// set timer period
+	TIMER0_ICR_R = TIMER_ICR_TATOCINT;			// clear timer1A timeout flag
+	TIMER0_IMR_R |= TIMER_IMR_TATOIM;				// arm timeout interrupt
+	NVIC_PRI5_R = (NVIC_PRI5_R & 0xFFFF00FF) | 0x00000000;// set priority to 0
+	NVIC_EN0_R = NVIC_EN0_INT21;						// enable interrupt in NVIC
+	TIMER0_CTL_R |= TIMER_CTL_TAEN;					// enable Timer1A
 }
 
 void initTimer1Noise() {	
@@ -68,7 +73,7 @@ void initTimer1Noise() {
 	TIMER1_TAPR_R = TIMER1A_PRESCALE;				// set timer period
 	TIMER1_ICR_R = TIMER_ICR_TATOCINT;			// clear timer1A timeout flag
 	TIMER1_IMR_R |= TIMER_IMR_TATOIM;				// arm timeout interrupt
-	NVIC_PRI5_R = (NVIC_PRI5_R & 0xFFFF00FF) | 0x00000000;// set priority to 0 as it is interrupting at only 20hz
+	NVIC_PRI5_R = (NVIC_PRI5_R & 0xFFFF00FF) | 0x00000000;// set priority to 0
 	NVIC_EN0_R = NVIC_EN0_INT21;						// enable interrupt in NVIC
 	TIMER1_CTL_R |= TIMER_CTL_TAEN;					// enable Timer1A
 }
@@ -78,7 +83,6 @@ void SYSTICKIntHandler() {
 	static uint32_t sysTickCount;					// increments every time in the loop. Resets at 136 ~= 1ms
 	static uint8_t scanCount;							// increments every sysTickCount reset. Resets at 10 ~= 10ms
 	static uint32_t phaseAccum0 = 0;
-	static uint8_t offset0 = 0;
 	static uint32_t phaseAccum1 = 0;
 	static uint8_t offset1 = 0;
 	static uint32_t phaseAccum2 = 0;
@@ -117,13 +121,21 @@ void SYSTICKIntHandler() {
 	
 	//combine voices (add and shift right one to get a rough average)
 	PWM0_0_CMPA_R = (saw[offset0] + square50[offset1]) >> 1;
-	PWM0_0_CMPB_R = wave0[offset0];
+	PWM0_0_CMPB_R = wave0[offset0] + 127;
+	if (offset0 == 0) {	
+		tempPtr = testChannel->note->waveTable;
+		testChannel->note->waveTable = testChannel->note->workingWaveTable;
+		testChannel->note->workingWaveTable = tempPtr;
+		wave0 = testChannel->note->waveTable;
+	}
 	/*if (newBit && (tword3 != NO_NOTE)) {
 		PWM0_0_CMPB_R = wave0[0];
 	} else {
 		PWM0_0_CMPB_R = 0;
 	}*/
 }
+
+void TIMER0IntHandler() {}
 
 // Software based linear feedback shift register (lfsr)
 // modeled after the NES's 2A03

@@ -3,32 +3,43 @@
 #include "inc/linkedList.h"
 
 
-void initChannel(Channel** channel, uint8_t* waveTableRef) {
+void initChannel(Channel** channel, int8_t* waveTableRef) {
 	VolumeEff *volumeEff;
 	
 	*channel = malloc(sizeof(Channel));
 	(*channel)->waveTable_ref = waveTableRef;
 	
 	(*channel)->note = malloc(sizeof(Note));
-	(*channel)->note->waveTable = malloc(sizeof(uint8_t [WAVE_TABLE_SIZE]));
+	(*channel)->note->waveTable = malloc(sizeof(int8_t [WAVE_TABLE_SIZE]));
+	(*channel)->note->workingWaveTable = malloc(sizeof(int8_t [WAVE_TABLE_SIZE]));
 	(*channel)->note->isNoise = false;
 	
 	(*channel)->note->key = malloc(sizeof(Key));
 	(*channel)->note->key->letter = NO_NOTE;
 	(*channel)->note->key->octave = MIN_OCTAVE + 2;
 	
+	(*channel)->note->effects = malloc(sizeof(Effects));
 	(*channel)->note->effects->enabled = true;
 	(*channel)->note->effects->volumeEnabled = true;
 	(*channel)->note->effects->released = true; 
-	(*channel)->note->effects->volumeList = malloc(sizeof(List));
-	(*channel)->note->effects->volumeCur = malloc(sizeof(Node));
-	(*channel)->note->effects->volumeLoopPos = malloc(sizeof(Node));
-	(*channel)->note->effects->volumeReleasePos = malloc(sizeof(Node));
+	(*channel)->note->effects->volumeList = newList();
+	(*channel)->note->effects->volumeCur = newNode();
+	(*channel)->note->effects->volumeLoopPos = newNode();
+	(*channel)->note->effects->volumeReleasePos = newNode();
 	
-	volumeEff = malloc(sizeof(VolumeEff));
-	volumeEff->duration = 100;
-	volumeEff->volume = 1;
-	volumeEff->marker = 0;
+	//TODO: work on a solution to mark our loop and release pos
+	
+	volumeEff = newVolumeEff(.1, 10, NO_MARKER);						
+	add((*channel)->note->effects->volumeList, volumeEff);
+	volumeEff = newVolumeEff(.75, 10, LOOP_MARKER);							
+	add((*channel)->note->effects->volumeList, volumeEff);
+	volumeEff = newVolumeEff(.5, 10, NO_MARKER);					
+	add((*channel)->note->effects->volumeList, volumeEff);
+	volumeEff = newVolumeEff(.5, 10, RELEASE_MARKER);							
+	add((*channel)->note->effects->volumeList, volumeEff);
+	volumeEff = newVolumeEff(.1, 10, NO_MARKER);							
+	add((*channel)->note->effects->volumeList, volumeEff);
+	volumeEff = newVolumeEff(0, 0, END_MARKER);							//end
 	add((*channel)->note->effects->volumeList, volumeEff);
 	
 

@@ -17,6 +17,7 @@
 #define LOOP_MARKER 		'L'	// marks the point to return to when note is being held
 #define RELEASE_MARKER	'R'	// marks the point to go to on release
 #define END_MARKER			'E'	// marks the end of a note
+#define NO_MARKER				'\0'// blank ie means nothing
 
 /* Basic loop structure for effects
  * Start when key is pressed
@@ -52,3 +53,6 @@ Node* findMarker(List *list, char marker);
 
 // determines when to move to the next state
 bool updateVolumeState(Effects* self);
+
+// basically a constructor - returns a pointer to an effect with given params
+VolumeEff* newVolumeEff(float volume, uint32_t duration, char marker);
