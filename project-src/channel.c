@@ -16,7 +16,7 @@ void initChannel(Channel** channel, int8_t* waveTableRef) {
 	
 	(*channel)->note->key = malloc(sizeof(Key));
 	(*channel)->note->key->letter = NO_NOTE;
-	(*channel)->note->key->octave = MIN_OCTAVE + 2;
+	(*channel)->note->key->octave = MIN_OCTAVE + 3;
 	
 	(*channel)->note->effects = malloc(sizeof(Effects));
 	(*channel)->note->effects->enabled = true;
@@ -29,16 +29,33 @@ void initChannel(Channel** channel, int8_t* waveTableRef) {
 	
 	//TODO: work on a solution to mark our loop and release pos
 	
-	volumeEff = newVolumeEff(.1, 10, NO_MARKER);						
+	volumeEff = newVolumeEff(.75, 10, NO_MARKER);							
 	add((*channel)->note->effects->volumeList, volumeEff);
-	volumeEff = newVolumeEff(.75, 10, LOOP_MARKER);							
+	
+	volumeEff = newVolumeEff(1, 100, LOOP_MARKER);							
 	add((*channel)->note->effects->volumeList, volumeEff);
-	volumeEff = newVolumeEff(.5, 10, NO_MARKER);					
+	
+	volumeEff = newVolumeEff(1, 100, NO_MARKER);					
 	add((*channel)->note->effects->volumeList, volumeEff);
-	volumeEff = newVolumeEff(.5, 10, RELEASE_MARKER);							
+	
+	volumeEff = newVolumeEff(1, 100, RELEASE_MARKER);							
 	add((*channel)->note->effects->volumeList, volumeEff);
-	volumeEff = newVolumeEff(.1, 10, NO_MARKER);							
+	
+	volumeEff = newVolumeEff(1, 10, NO_MARKER);							
 	add((*channel)->note->effects->volumeList, volumeEff);
+	
+	volumeEff = newVolumeEff(.75, 50, NO_MARKER);							
+	add((*channel)->note->effects->volumeList, volumeEff);
+	
+	volumeEff = newVolumeEff(.5, 50, NO_MARKER);							
+	add((*channel)->note->effects->volumeList, volumeEff);	
+	
+	volumeEff = newVolumeEff(.25, 50, NO_MARKER);							
+	add((*channel)->note->effects->volumeList, volumeEff);
+	
+	volumeEff = newVolumeEff(.1, 50, NO_MARKER);							
+	add((*channel)->note->effects->volumeList, volumeEff);
+	
 	volumeEff = newVolumeEff(0, 0, END_MARKER);							//end
 	add((*channel)->note->effects->volumeList, volumeEff);
 	

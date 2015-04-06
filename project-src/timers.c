@@ -18,14 +18,14 @@ volatile uint32_t tword3 = 0;
 volatile bool newBit = 0;
 volatile bool alertScan = false;
 volatile bool alertEffect = false;
-volatile bool volumeUpdate = false;
+extern volatile bool volumeUpdate;
 
 volatile uint8_t testIndex = 0;
 
-int8_t* wave0 = triangleTest;
-uint8_t* wave1 = square50;
-uint8_t* wave2 = square50;
-uint8_t* wave3 = square50;
+int8_t* wave0 = triangle;
+int8_t* wave1 = square50;
+int8_t* wave2 = square50;
+int8_t* wave3 = square50;
 
 
 int8_t* tempPtr;
@@ -121,12 +121,16 @@ void SYSTICKIntHandler() {
 	
 	//combine voices (add and shift right one to get a rough average)
 	PWM0_0_CMPA_R = (saw[offset0] + square50[offset1]) >> 1;
-	PWM0_0_CMPB_R = wave0[offset0] + 127;
-	if (offset0 == 0) {	
+	PWM0_0_CMPB_R = (wave0[offset0] + 127);
+	
+	if (offset0 == 0 && volumeUpdate) {	
+		
 		tempPtr = testChannel->note->waveTable;
 		testChannel->note->waveTable = testChannel->note->workingWaveTable;
 		testChannel->note->workingWaveTable = tempPtr;
+		
 		wave0 = testChannel->note->waveTable;
+		volumeUpdate = false;
 	}
 	/*if (newBit && (tword3 != NO_NOTE)) {
 		PWM0_0_CMPB_R = wave0[0];

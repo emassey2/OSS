@@ -1,5 +1,7 @@
 #include "inc/note.h"
 
+volatile bool volumeUpdate = false;
+
 void updateKey(Note* self, int8_t keyNumber) {
 	static int8_t lastKeyNumber = NO_NOTE;
 	
@@ -159,13 +161,18 @@ void updateVolume(Note* self) {
 void adjustVolume(Note* self, int8_t* refTable) {
 	uint16_t i;
 	static float volumeScaler;
+	static int8_t* tempPtr;
 	
 	volumeScaler = ((VolumeEff*)self->effects->volumeCur->data)->volume;
 	
-	for (i = 0; i < EFFECT_SIZE; i++) {
-		self->workingWaveTable[i] = (uint8_t)(volumeScaler * refTable[i]);
+	if (volumeUpdate) {
+		
+	} else {
+		for (i = 0; i < EFFECT_SIZE; i++) {
+			self->workingWaveTable[i] = (int8_t)(volumeScaler * refTable[i]);
+		}
+		volumeUpdate = true;
 	}
-
 }
 
 void updateNoiseTWord(uint8_t keyOct, int8_t keyLetter, volatile uint32_t* tuningWord) {
