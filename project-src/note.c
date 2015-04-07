@@ -55,7 +55,7 @@ void updateTuningWord(Note* self, volatile uint32_t* tuningWord) {
 				if (self->isNoise) {
 					updateNoiseTWord(keyOct, keyLetter, tuningWord);
 				} else {
-					*tuningWord = TUNING_CONST * noteFreq[lastKeyOct + 4][lastKeyLetter];
+					*tuningWord = TUNING_CONST * noteFreq[lastKeyOct + 2][lastKeyLetter];
 				}
 		
 			// a new key has been pressed	
@@ -64,7 +64,7 @@ void updateTuningWord(Note* self, volatile uint32_t* tuningWord) {
 				if (self->isNoise) {
 					updateNoiseTWord(keyOct, keyLetter, tuningWord);
 				} else {
-					*tuningWord = TUNING_CONST * noteFreq[self->key->octave + 4][self->key->letter];
+					*tuningWord = TUNING_CONST * noteFreq[self->key->octave + 2][self->key->letter];
 				}
 		}
 		
@@ -77,17 +77,13 @@ void updateTuningWord(Note* self, volatile uint32_t* tuningWord) {
 			if (self->isNoise) {
 				updateNoiseTWord(keyOct, keyLetter, tuningWord);
 			} else {
-					*tuningWord = TUNING_CONST * noteFreq[self->key->octave + 4][self->key->letter];
+					*tuningWord = TUNING_CONST * noteFreq[self->key->octave + 2][self->key->letter];
 			}
 		}
 	}
 	
 	lastKeyOct = keyOct;	
 	lastKeyLetter = keyLetter;
-}
-
-void updateWaveTable(Note* self, int8_t* waveTable) {
-	waveTable = self->waveTable;
 }
 
 /* Basic loop structure for effects
@@ -125,7 +121,9 @@ void updateVolume(Note* self) {
 			if (self->key->letter != NO_NOTE) {
 				// if note is still pressed we mark release location and go back to the start of loop
 				self->effects->volumeReleasePos = self->effects->volumeCur;
-				self->effects->volumeCur = self->effects->volumeLoopPos;
+				if (updateVolumeState(self->effects)) {
+					self->effects->volumeCur = self->effects->volumeLoopPos;
+				}
 			} else {
 				//proceed as normal
 				// update our waveTable and increment the counter by one

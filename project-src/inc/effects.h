@@ -6,12 +6,6 @@
 /******************************************************************************
  * Defines
  *****************************************************************************/
-// These might need to be variables some day
-#define ATTACK 0
-#define DECAY 50
-#define SUSTAIN 100//150
-#define RELEASE 150//254
-#define SUSTAIN_VOL .5
 #define EFFECT_SIZE 256
  
 #define LOOP_MARKER 		'L'	// marks the point to return to when note is being held
@@ -47,9 +41,11 @@ typedef struct VolumeEff {
 	char 			marker;				// if this state marks a special point (see markers above)
 }VolumeEff;
 
-// search a list to find a given marker
-// returns the first node with marker or null
-Node* findMarker(List *list, char marker);
+typedef struct ArpeggioEff {
+	int8_t 		distance;			// distance relative to current note (the key being pressed)
+	uint32_t	duration;			// how long this state lasts
+	char 			marker;				// if this state marks a special point (see markers above)
+}ArpeggioEff;
 
 // determines when to move to the next state
 bool updateVolumeState(Effects* self);

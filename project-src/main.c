@@ -95,7 +95,7 @@ int main(void) {
 	initTimers();
 	
 	UART0_TxPoll("\n\rInitializing Channels...");
-	initChannel(&testChannel, square12);
+	initChannel(&testChannel, square25);
 	
 	UART0_TxPoll("\n\rEntering Main Loop");
 	

@@ -10,32 +10,15 @@ VolumeEff* newVolumeEff(float volume, uint32_t duration, char marker) {
 	
 	return volumeEff;
 }
-// may not need this method anymore
-Node* findMarker(List *list, char marker) {
-	Node *curNode;
+
+// returns a pointer to the new ArpeggioEff
+ArpeggioEff* newArpeggioEff(int8_t distance, uint32_t duration, char marker) {
+	ArpeggioEff* arpeggioEff = malloc(sizeof(ArpeggioEff));
+	arpeggioEff->distance = distance;
+	arpeggioEff->duration = duration;
+	arpeggioEff->marker = marker;
 	
-	//validate params
-	if (list == NULL) {
-		return NULL;
-	} else if (list->head == NULL) {
-		return NULL;
-	}
-	
-	// get a pointer to the head of our list
-	curNode = list->head;
-	
-	// iterate over our list to find marker
-	while (curNode->next != NULL) {
-		if (((VolumeEff*)curNode->data)->marker != marker) {
-			// marker found! return our node
-			return curNode;
-		} else {
-			// increment
-			curNode = curNode->next;
-		}
-	}
-	
-	return NULL;
+	return arpeggioEff;
 }
 
 bool updateVolumeState(Effects* self) {
