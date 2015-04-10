@@ -24,4 +24,5 @@ void adjustVolume(Note* self, int8_t* refTable);
 void adjustArpeggio(Note* self);
 void updateNoiseTWord(uint8_t keyOct, int8_t keyLetter, volatile uint32_t* tuningWord);
 void calculateTuningWord(volatile uint32_t* tuningWord, int8_t key, uint8_t octave, int8_t arpeggioModifier);
-Note* initNote(bool isNoise);
+Note* initNote(bool isNoise, int8_t* waveTableRef);
+void resetEffects(Note* self);

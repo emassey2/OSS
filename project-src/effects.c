@@ -1,6 +1,9 @@
 #include "inc/effects.h"
 #include <stdlib.h>
 
+uint32_t currentVolumeDuration = 0;
+uint32_t currentArpeggioDuration = 0;
+
 Effects* initEffects(bool enabled, bool volEnabled, bool arpEnabled) {
 	Effects* self = malloc(sizeof(Effects));
 	self->enabled = enabled;
@@ -65,26 +68,24 @@ bool updateState(EffectState* self) {
 
 bool updateVolumeState(EffectState* self) {
 	// keeps track how long we have been in a given state
-	static uint32_t currentDuration = 0;
 	
-	if ( (self)->duration > currentDuration) {
-		currentDuration++;
+	if ( (self)->duration > currentVolumeDuration) {
+		currentVolumeDuration++;
 		return false;
 	} else {
-		currentDuration = 0;
+		currentVolumeDuration = 0;
 		return true;
 	}
 }
 
 bool updateArpeggioState(EffectState* self) {
 	// keeps track how long we have been in a given state
-	static uint32_t currentDuration = 0;
 	
-	if ( (self)->duration > currentDuration) {
-		currentDuration++;
+	if ( (self)->duration > currentArpeggioDuration) {
+		currentArpeggioDuration++;
 		return false;
 	} else {
-		currentDuration = 0;
+		currentArpeggioDuration = 0;
 		return true;
 	}
 }

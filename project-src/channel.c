@@ -3,54 +3,67 @@
 #include "inc/linkedList.h"
 
 
-void initChannel(Channel** channel, int8_t* waveTableRef) {
+void initChannel(Channel** channel, int8_t** outputTable, int8_t* waveTableRef) {
 	EffectState *volumeEff;
 	EffectState *arpeggioEff;
 	
 	*channel = malloc(sizeof(Channel));
 	(*channel)->waveTable_ref = waveTableRef;
 	
-	(*channel)->note = initNote(false);
+	(*channel)->note = initNote(false, waveTableRef);
+	*outputTable = (*channel)->note->waveTable;
 	
 	(*channel)->note->key = initKey();
 	
-	(*channel)->note->effects = initEffects(true, true, true);
+	(*channel)->note->effects = initEffects(true, false, true);
 	
 	//TODO: work on a solution to mark our loop and release pos ?
 
 	
-	volumeEff = newVolumeEff(1, 1, LOOP_MARKER);							
+	/*volumeEff = newVolumeEff(.5, 88, LOOP_MARKER);							
 	add((*channel)->note->effects->volume->list, volumeEff);
 	
-	/*volumeEff = newVolumeEff(0, 100, NO_MARKER);							
+	volumeEff = newVolumeEff(.4, 88, NO_MARKER);							
 	add((*channel)->note->effects->volume->list, volumeEff);
 	
-	volumeEff = newVolumeEff(.5, 100, NO_MARKER);							
-	add((*channel)->note->effects->volume->list, volumeEff);*/
+	volumeEff = newVolumeEff(.3, 88, NO_MARKER);							
+	add((*channel)->note->effects->volume->list, volumeEff);
 	
-	volumeEff = newVolumeEff(1, 1, RELEASE_MARKER);							
+	volumeEff = newVolumeEff(.2, 88, NO_MARKER);							
+	add((*channel)->note->effects->volume->list, volumeEff);
+	
+	volumeEff = newVolumeEff(.1, 88, NO_MARKER);							
+	add((*channel)->note->effects->volume->list, volumeEff);
+	
+	volumeEff = newVolumeEff(.2, 88, NO_MARKER);							
+	add((*channel)->note->effects->volume->list, volumeEff);
+	
+	volumeEff = newVolumeEff(.3, 88, NO_MARKER);							
+	add((*channel)->note->effects->volume->list, volumeEff);
+	
+	volumeEff = newVolumeEff(.4, 88, NO_MARKER);							
+	add((*channel)->note->effects->volume->list, volumeEff);	
+	
+	volumeEff = newVolumeEff(1, 0, RELEASE_MARKER);							
 	add((*channel)->note->effects->volume->list, volumeEff);
 	
 	volumeEff = newVolumeEff(0, 0, END_MARKER);							//end
-	add((*channel)->note->effects->volume->list, volumeEff);
+	add((*channel)->note->effects->volume->list, volumeEff);*/
 	
 	
-	arpeggioEff = newArpeggioEff(4, 100, NO_MARKER);							
+	arpeggioEff = newArpeggioEff(0, 200, LOOP_MARKER);							
 	add((*channel)->note->effects->arpeggio->list, arpeggioEff);
 	
-	arpeggioEff = newArpeggioEff(0, 100, LOOP_MARKER);							
+	arpeggioEff = newArpeggioEff(-3, 200, NO_MARKER);							
 	add((*channel)->note->effects->arpeggio->list, arpeggioEff);
 	
-	arpeggioEff = newArpeggioEff(4, 100, NO_MARKER);							
+	arpeggioEff = newArpeggioEff(-5, 200, NO_MARKER);							
 	add((*channel)->note->effects->arpeggio->list, arpeggioEff);
 	
-	arpeggioEff = newArpeggioEff(9, 100, NO_MARKER);							
+	arpeggioEff = newArpeggioEff(-9, 200, NO_MARKER);							
 	add((*channel)->note->effects->arpeggio->list, arpeggioEff);
 	
-	arpeggioEff = newArpeggioEff(12, 100, NO_MARKER);							
-	add((*channel)->note->effects->arpeggio->list, arpeggioEff);
-	
-	arpeggioEff = newArpeggioEff(0, 100, RELEASE_MARKER);							
+	arpeggioEff = newArpeggioEff(0, 0, RELEASE_MARKER);							
 	add((*channel)->note->effects->arpeggio->list, arpeggioEff);
 	
 	arpeggioEff = newArpeggioEff(0, 0, END_MARKER);							//end

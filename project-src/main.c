@@ -35,11 +35,11 @@ extern volatile uint32_t tword3;
 extern volatile uint32_t tword4;
 extern volatile uint32_t tword5;
 extern int8_t* wave0;
-extern uint8_t* wave1;
-extern uint8_t* wave2;
-extern uint8_t* wave3;
-extern uint8_t* wave4;
-extern uint8_t* wave5;
+extern int8_t* wave1;
+extern int8_t* wave2;
+extern int8_t* wave3;
+extern int8_t* wave4;
+extern int8_t* wave5;
 
 
 
@@ -95,7 +95,7 @@ int main(void) {
 	initTimers();
 	
 	UART0_TxPoll("\n\rInitializing Channels...");
-	initChannel(&testChannel, square25);
+	initChannel(&testChannel, &wave0, saw);
 	
 	UART0_TxPoll("\n\rEntering Main Loop");
 	

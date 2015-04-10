@@ -4,14 +4,23 @@
 volatile bool volumeUpdate = false;
 int8_t arpeggioModifier = 0;
 
+extern uint32_t currentVolumeDuration;
+extern uint32_t currentArpeggioDuration;
 
-Note* initNote(bool isNoise) {
-	Note* effect = malloc(sizeof(Note));
-	effect->waveTable = malloc(sizeof(int8_t [WAVE_TABLE_SIZE]));
-	effect->workingWaveTable = malloc(sizeof(int8_t [WAVE_TABLE_SIZE]));
-	effect->isNoise = false;
+
+Note* initNote(bool isNoise, int8_t* waveTableRef) {
+	uint16_t i;
+	Note* self = malloc(sizeof(Note));
+	self->waveTable = malloc(sizeof(int8_t [WAVE_TABLE_SIZE]));
+	self->workingWaveTable = malloc(sizeof(int8_t [WAVE_TABLE_SIZE]));
+	self->isNoise = false;
 	
-	return effect;
+	for (i = 0; i < EFFECT_SIZE; i++) {
+			self->workingWaveTable[i] = waveTableRef[i];
+			self->waveTable[i] = waveTableRef[i];
+	}
+	
+	return self;
 }
 
 
@@ -22,13 +31,12 @@ void updateKey(Note* self, int8_t keyNumber) {
 	if (lastKeyNumber != keyNumber) {
 		if (lastKeyNumber != NO_NOTE && keyNumber != NO_NOTE) {
 			// new key is pressed while another key was being held
-			//self->effects->volume->curPos = findMarker(self->effects->volume->list->, 'L');
+			resetEffects(self);
 			self->stillPlaying = true;
 			self->effects->released = false;
 		} else if (keyNumber != NO_NOTE) {
 			// no keys being pressed to one key being pressed
-			self->effects->volume->curPos = self->effects->volume->list->head;
-			self->effects->arpeggio->curPos = self->effects->arpeggio->list->head;
+			resetEffects(self);
 			self->stillPlaying = true;
 			self->effects->released = false;
 		} else {
@@ -42,7 +50,7 @@ void updateKey(Note* self, int8_t keyNumber) {
 void calculateTuningWord(volatile uint32_t* tuningWord, int8_t key, uint8_t octave, int8_t arpeggioModifier) {
 	// convert everything into one giant number know as keyNumber
 	int16_t keyNumber;
-	keyNumber = (octave+3) * KEYS_PER_OCT + key + arpeggioModifier;
+	keyNumber = (octave + 2) * KEYS_PER_OCT + key + arpeggioModifier;
 	if (keyNumber < 0 || keyNumber > (NUM_OCTAVES * KEYS_PER_OCT) - 1 ) {
 		// note is too low or too high to play
 		*tuningWord = NO_SOUND;
@@ -98,6 +106,9 @@ void updateTuningWord(Note* effect, volatile uint32_t* tuningWord) {
 				} else {
 					calculateTuningWord(tuningWord, keyLetter, keyOct, arpeggioModifier);
 				}
+		} else {
+			//update Tuningword like normal
+			calculateTuningWord(tuningWord, keyLetter, keyOct, arpeggioModifier);
 		}
 		
 	//effects can be ignored
@@ -128,6 +139,14 @@ void updateTuningWord(Note* effect, volatile uint32_t* tuningWord) {
  *       |      ^
  * >-----L------R------E
  */
+
+void resetEffects(Note* self) {
+	currentVolumeDuration = 0;
+	currentArpeggioDuration = 0;
+	self->effects->volume->curPos = self->effects->volume->list->head;
+	self->effects->arpeggio->curPos = self->effects->arpeggio->list->head;
+}
+
 void updateEffects(Note* self, int8_t* refTable) {
 	if (self->stillPlaying) {
 		//first we adjust our volume and then we increment our state
