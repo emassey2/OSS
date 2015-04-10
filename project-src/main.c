@@ -130,8 +130,8 @@ int main(void) {
 			
 			keyNumber = scanMatrix(scanningMatrix);
 			updateKey(testChannel->note, keyNumber);
-			updateTuningWord(testChannel->note, &tword0);
 		}
+		updateTuningWord(testChannel->note, &tword0);
 
 	}
 };
