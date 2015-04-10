@@ -50,24 +50,53 @@ void initChannel(Channel** channel, int8_t** outputTable, int8_t* waveTableRef) 
 	volumeEff = newVolumeEff(0, 0, END_MARKER);							//end
 	add((*channel)->note->effects->volume->list, volumeEff);*/
 	
-	
-	arpeggioEff = newArpeggioEff(0, 200, LOOP_MARKER);							
+		
+	arpeggioEff = newArpeggioEff(-0, 33, LOOP_MARKER);							
+	add((*channel)->note->effects->arpeggio->list, arpeggioEff);
+		
+	arpeggioEff = newArpeggioEff(-1, 33, NO_MARKER);							
+	add((*channel)->note->effects->arpeggio->list, arpeggioEff);
+		
+	arpeggioEff = newArpeggioEff(-2, 33, NO_MARKER);							
+	add((*channel)->note->effects->arpeggio->list, arpeggioEff);
+		
+	arpeggioEff = newArpeggioEff(-3, 33, NO_MARKER);								
+	add((*channel)->note->effects->arpeggio->list, arpeggioEff);					
+		
+	arpeggioEff = newArpeggioEff(-4, 33, NO_MARKER);							
+	add((*channel)->note->effects->arpeggio->list, arpeggioEff);
+		
+	arpeggioEff = newArpeggioEff(-5, 33, NO_MARKER);							
+	add((*channel)->note->effects->arpeggio->list, arpeggioEff);
+		
+	arpeggioEff = newArpeggioEff(-6, 33, NO_MARKER);							
+	add((*channel)->note->effects->arpeggio->list, arpeggioEff);						
+		
+	arpeggioEff = newArpeggioEff(-7, 33, NO_MARKER);							
+	add((*channel)->note->effects->arpeggio->list, arpeggioEff);
+		
+	arpeggioEff = newArpeggioEff(-8, 33, NO_MARKER);							
+	add((*channel)->note->effects->arpeggio->list, arpeggioEff);
+		
+	arpeggioEff = newArpeggioEff(-9, 33, NO_MARKER);							
 	add((*channel)->note->effects->arpeggio->list, arpeggioEff);
 	
-	arpeggioEff = newArpeggioEff(-3, 200, NO_MARKER);							
+	arpeggioEff = newArpeggioEff(-10, 33, NO_MARKER);							
 	add((*channel)->note->effects->arpeggio->list, arpeggioEff);
 	
-	arpeggioEff = newArpeggioEff(-5, 200, NO_MARKER);							
+	arpeggioEff = newArpeggioEff(-11, 33, NO_MARKER);							
 	add((*channel)->note->effects->arpeggio->list, arpeggioEff);
 	
-	arpeggioEff = newArpeggioEff(-9, 200, NO_MARKER);							
+	arpeggioEff = newArpeggioEff(-12, 33, NO_MARKER);							
 	add((*channel)->note->effects->arpeggio->list, arpeggioEff);
-	
-	arpeggioEff = newArpeggioEff(0, 0, RELEASE_MARKER);							
+
+	arpeggioEff = newArpeggioEff(-12, 0, NO_MARKER);							
 	add((*channel)->note->effects->arpeggio->list, arpeggioEff);
+	(*channel)->note->effects->arpeggio->releasePos = (*channel)->note->effects->arpeggio->list->tail;
 	
 	arpeggioEff = newArpeggioEff(0, 0, END_MARKER);							//end
 	add((*channel)->note->effects->arpeggio->list, arpeggioEff);
+	
 }
 
 

@@ -50,7 +50,7 @@ void updateKey(Note* self, int8_t keyNumber) {
 void calculateTuningWord(volatile uint32_t* tuningWord, int8_t key, uint8_t octave, int8_t arpeggioModifier) {
 	// convert everything into one giant number know as keyNumber
 	int16_t keyNumber;
-	keyNumber = (octave + 2) * KEYS_PER_OCT + key + arpeggioModifier;
+	keyNumber = (octave + 3) * KEYS_PER_OCT + key + arpeggioModifier;
 	if (keyNumber < 0 || keyNumber > (NUM_OCTAVES * KEYS_PER_OCT) - 1 ) {
 		// note is too low or too high to play
 		*tuningWord = NO_SOUND;
