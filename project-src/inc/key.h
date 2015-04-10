@@ -27,3 +27,4 @@ typedef struct Key {
  *  				keyNumber - number of the key on the keyboard that is pressed
  */
 Key* getKey(Key* self, int8_t keyNumber);
+Key* initKey(void);

@@ -19,6 +19,9 @@ typedef struct Note {
 void updateKey(Note* self, int8_t keyNumber);
 void updateTuningWord(Note* self, volatile uint32_t* tuningWord);
 void updateEffects(Note* self, int8_t* refTable);
+void updateEffect(Note* self, Effect* effect);
 void adjustVolume(Note* self, int8_t* refTable);
+void adjustArpeggio(Note* self);
 void updateNoiseTWord(uint8_t keyOct, int8_t keyLetter, volatile uint32_t* tuningWord);
-void updateVolume(Note* self);
+void calculateTuningWord(volatile uint32_t* tuningWord, int8_t key, uint8_t octave, int8_t arpeggioModifier);
+Note* initNote(bool isNoise);

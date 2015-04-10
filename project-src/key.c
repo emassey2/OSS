@@ -1,4 +1,5 @@
 #include "inc/key.h"
+#include <stdlib.h>
 
 Key* getKey(Key* self, int8_t keyNumber) {
 	uint8_t oct;
@@ -11,6 +12,15 @@ Key* getKey(Key* self, int8_t keyNumber) {
 	
 	self->octave = oct;
 	self->letter = keyNumber;
+	
+	return self;
+}
+
+
+Key* initKey() {
+	Key* self = malloc(sizeof(Key));
+	self->letter = NO_NOTE;
+	self->octave = MIN_OCTAVE;
 	
 	return self;
 }

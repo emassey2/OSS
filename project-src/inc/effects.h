@@ -1,4 +1,5 @@
 #include <stdbool.h>
+#include <stdint.h>
 #include "board_config.h"
 #include "defines.h"
 #include "linkedList.h"
@@ -8,10 +9,18 @@
  *****************************************************************************/
 #define EFFECT_SIZE 256
  
-#define LOOP_MARKER 		'L'	// marks the point to return to when note is being held
+#define LOOP_MARKER			'L'	// marks the point to return to when note is being held
 #define RELEASE_MARKER	'R'	// marks the point to go to on release
 #define END_MARKER			'E'	// marks the end of a note
 #define NO_MARKER				'\0'// blank ie means nothing
+#define VOLUME					'V'	// volume type
+#define ARPEGGIO				'A'	// arpeggio type
+
+
+
+/* EACH CHANNEEL... */
+
+
 
 /* Basic loop structure for effects
  * Start when key is pressed
@@ -23,32 +32,40 @@
  *       |      ^
  * >-----L------R------E
  */
- 
+
+// an effect of a single type eg volume or arpeggio
+typedef struct Effect {
+	List* list;
+	Node* curPos;			// ptr to our current node
+	Node* loopPos;		// ptr to the loop node
+	Node* releasePos;	// ptr to the release node
+}Effect;
+
+// a struct that holds all of our effects
 typedef struct Effects {
 	bool enabled;						// if effects as a whole are enabled
 	bool volumeEnabled;			// if volume effects are enabled
+	bool arpeggioEnabled;		// if arpeggio effects are enabled
 	bool released;					// if the key is no longer being pressed
-	List* volumeList;				// list of our volume effects
-	Node* volumeCur;				// ptr to our current volumeEff node
-	Node* volumeLoopPos;		// ptr to the loop point
-	Node* volumeReleasePos;	// ptr to the release point
-	
+	Effect* volume;					// ptr to our volume Effects
+	Effect* arpeggio;				// ptr to our arpeggio Effects
 }Effects;
 
-typedef struct VolumeEff {
-	float 		volume;				// volume at the current state
+// a given state in the list of an effect
+typedef struct EffectState {
+	void*			modifier;		// this is the actual affect eg float from 0-1 for volume or int8 for arpeggios
 	uint32_t	duration;			// how long this state lasts
 	char 			marker;				// if this state marks a special point (see markers above)
-}VolumeEff;
+	char			type;					// the type of effect eg volume or arpeggio
+}EffectState;
 
-typedef struct ArpeggioEff {
-	int8_t 		distance;			// distance relative to current note (the key being pressed)
-	uint32_t	duration;			// how long this state lasts
-	char 			marker;				// if this state marks a special point (see markers above)
-}ArpeggioEff;
+Effects* initEffects(bool enabled, bool volEnabled, bool arpEnabled);
+bool updateState(EffectState* self);
 
-// determines when to move to the next state
-bool updateVolumeState(Effects* self);
+void initEffect(Effect* self);
+bool updateVolumeState(EffectState* self);
+bool updateArpeggioState(EffectState* self);
 
 // basically a constructor - returns a pointer to an effect with given params
-VolumeEff* newVolumeEff(float volume, uint32_t duration, char marker);
+EffectState* newVolumeEff(float volume, uint32_t duration, char marker);
+EffectState* newArpeggioEff(int8_t distance, uint32_t duration, char marker);

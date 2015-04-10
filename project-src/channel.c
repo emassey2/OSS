@@ -4,46 +4,57 @@
 
 
 void initChannel(Channel** channel, int8_t* waveTableRef) {
-	VolumeEff *volumeEff;
+	EffectState *volumeEff;
+	EffectState *arpeggioEff;
 	
 	*channel = malloc(sizeof(Channel));
 	(*channel)->waveTable_ref = waveTableRef;
 	
-	(*channel)->note = malloc(sizeof(Note));
-	(*channel)->note->waveTable = malloc(sizeof(int8_t [WAVE_TABLE_SIZE]));
-	(*channel)->note->workingWaveTable = malloc(sizeof(int8_t [WAVE_TABLE_SIZE]));
-	(*channel)->note->isNoise = false;
+	(*channel)->note = initNote(false);
 	
-	(*channel)->note->key = malloc(sizeof(Key));
-	(*channel)->note->key->letter = NO_NOTE;
-	(*channel)->note->key->octave = MIN_OCTAVE;
+	(*channel)->note->key = initKey();
 	
-	(*channel)->note->effects = malloc(sizeof(Effects));
-	(*channel)->note->effects->enabled = true;
-	(*channel)->note->effects->volumeEnabled = true;
-	(*channel)->note->effects->released = true; 
-	(*channel)->note->effects->volumeList = newList();
-	(*channel)->note->effects->volumeCur = newNode();
-	(*channel)->note->effects->volumeLoopPos = newNode();
-	(*channel)->note->effects->volumeReleasePos = newNode();
+	(*channel)->note->effects = initEffects(true, true, true);
 	
 	//TODO: work on a solution to mark our loop and release pos ?
+
 	
-	volumeEff = newVolumeEff(1, 100, LOOP_MARKER);							
-	add((*channel)->note->effects->volumeList, volumeEff);
+	volumeEff = newVolumeEff(1, 1, LOOP_MARKER);							
+	add((*channel)->note->effects->volume->list, volumeEff);
 	
-	volumeEff = newVolumeEff(1, 100, RELEASE_MARKER);							
-	add((*channel)->note->effects->volumeList, volumeEff);
+	/*volumeEff = newVolumeEff(0, 100, NO_MARKER);							
+	add((*channel)->note->effects->volume->list, volumeEff);
+	
+	volumeEff = newVolumeEff(.5, 100, NO_MARKER);							
+	add((*channel)->note->effects->volume->list, volumeEff);*/
+	
+	volumeEff = newVolumeEff(1, 1, RELEASE_MARKER);							
+	add((*channel)->note->effects->volume->list, volumeEff);
 	
 	volumeEff = newVolumeEff(0, 0, END_MARKER);							//end
-	add((*channel)->note->effects->volumeList, volumeEff);
+	add((*channel)->note->effects->volume->list, volumeEff);
 	
-
-	initADSREnvelope((*channel));
-}
-
-void initADSREnvelope(Channel* self) {
 	
+	arpeggioEff = newArpeggioEff(4, 100, NO_MARKER);							
+	add((*channel)->note->effects->arpeggio->list, arpeggioEff);
+	
+	arpeggioEff = newArpeggioEff(0, 100, LOOP_MARKER);							
+	add((*channel)->note->effects->arpeggio->list, arpeggioEff);
+	
+	arpeggioEff = newArpeggioEff(4, 100, NO_MARKER);							
+	add((*channel)->note->effects->arpeggio->list, arpeggioEff);
+	
+	arpeggioEff = newArpeggioEff(9, 100, NO_MARKER);							
+	add((*channel)->note->effects->arpeggio->list, arpeggioEff);
+	
+	arpeggioEff = newArpeggioEff(12, 100, NO_MARKER);							
+	add((*channel)->note->effects->arpeggio->list, arpeggioEff);
+	
+	arpeggioEff = newArpeggioEff(0, 100, RELEASE_MARKER);							
+	add((*channel)->note->effects->arpeggio->list, arpeggioEff);
+	
+	arpeggioEff = newArpeggioEff(0, 0, END_MARKER);							//end
+	add((*channel)->note->effects->arpeggio->list, arpeggioEff);
 }
 
 

@@ -1,31 +1,73 @@
 #include "inc/effects.h"
 #include <stdlib.h>
 
+Effects* initEffects(bool enabled, bool volEnabled, bool arpEnabled) {
+	Effects* self = malloc(sizeof(Effects));
+	self->enabled = enabled;
+	self->volumeEnabled = volEnabled;
+	self->arpeggioEnabled = arpEnabled;
+	
+	if (enabled) {
+		if (volEnabled) {
+			self->volume = malloc(sizeof(Effect));
+			initEffect(self->volume);
+		}
+		if (arpEnabled) {
+			self->arpeggio = malloc(sizeof(Effect));
+			initEffect(self->arpeggio);
+		}
+	}
+	
+	return self;
+}
+
+// populates a given effects list and nodes
+void initEffect(Effect* self) {
+	self->list = newList();
+	self->curPos = self->list->head;
+	self->loopPos = self->list->head;
+	self->releasePos = self->list->head;
+}
+
 // returns a pointer to the new VolumeEff
-VolumeEff* newVolumeEff(float volume, uint32_t duration, char marker) {
-	VolumeEff* volumeEff = malloc(sizeof(VolumeEff));
-	volumeEff->volume = volume;
+EffectState* newVolumeEff(float volume, uint32_t duration, char marker) {
+	EffectState* volumeEff = malloc(sizeof(EffectState));
+	volumeEff->modifier = malloc(sizeof(float));
+	*((float*)volumeEff->modifier) = volume;
 	volumeEff->duration = duration;
 	volumeEff->marker = marker;
+	volumeEff->type = VOLUME;
 	
 	return volumeEff;
 }
 
 // returns a pointer to the new ArpeggioEff
-ArpeggioEff* newArpeggioEff(int8_t distance, uint32_t duration, char marker) {
-	ArpeggioEff* arpeggioEff = malloc(sizeof(ArpeggioEff));
-	arpeggioEff->distance = distance;
+EffectState* newArpeggioEff(int8_t distance, uint32_t duration, char marker) {
+	EffectState* arpeggioEff = malloc(sizeof(EffectState));
+	arpeggioEff->modifier = malloc(sizeof(int8_t));
+	*((int8_t*)arpeggioEff->modifier) = distance;
 	arpeggioEff->duration = duration;
 	arpeggioEff->marker = marker;
+	arpeggioEff->type = ARPEGGIO;
 	
 	return arpeggioEff;
 }
 
-bool updateVolumeState(Effects* self) {
+bool updateState(EffectState* self) {
+	if (self->type == VOLUME) {
+		return updateVolumeState(self);
+	} else if (self->type == ARPEGGIO) {
+		return updateArpeggioState(self);
+	}
+	//hopefully don't get here
+	return false;
+}
+
+bool updateVolumeState(EffectState* self) {
 	// keeps track how long we have been in a given state
 	static uint32_t currentDuration = 0;
 	
-	if (((VolumeEff*)self->volumeCur->data)->duration > currentDuration) {
+	if ( (self)->duration > currentDuration) {
 		currentDuration++;
 		return false;
 	} else {
@@ -34,3 +76,15 @@ bool updateVolumeState(Effects* self) {
 	}
 }
 
+bool updateArpeggioState(EffectState* self) {
+	// keeps track how long we have been in a given state
+	static uint32_t currentDuration = 0;
+	
+	if ( (self)->duration > currentDuration) {
+		currentDuration++;
+		return false;
+	} else {
+		currentDuration = 0;
+		return true;
+	}
+}

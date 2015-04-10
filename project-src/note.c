@@ -1,6 +1,19 @@
 #include "inc/note.h"
+#include <stdlib.h>
 
 volatile bool volumeUpdate = false;
+int8_t arpeggioModifier = 0;
+
+
+Note* initNote(bool isNoise) {
+	Note* effect = malloc(sizeof(Note));
+	effect->waveTable = malloc(sizeof(int8_t [WAVE_TABLE_SIZE]));
+	effect->workingWaveTable = malloc(sizeof(int8_t [WAVE_TABLE_SIZE]));
+	effect->isNoise = false;
+	
+	return effect;
+}
+
 
 void updateKey(Note* self, int8_t keyNumber) {
 	static int8_t lastKeyNumber = NO_NOTE;
@@ -9,12 +22,13 @@ void updateKey(Note* self, int8_t keyNumber) {
 	if (lastKeyNumber != keyNumber) {
 		if (lastKeyNumber != NO_NOTE && keyNumber != NO_NOTE) {
 			// new key is pressed while another key was being held
-			//self->effects->volumeCur = findMarker(self->effects->volumeList, 'L');
+			//self->effects->volume->curPos = findMarker(self->effects->volume->list->, 'L');
 			self->stillPlaying = true;
 			self->effects->released = false;
 		} else if (keyNumber != NO_NOTE) {
 			// no keys being pressed to one key being pressed
-			self->effects->volumeCur = self->effects->volumeList->head;
+			self->effects->volume->curPos = self->effects->volume->list->head;
+			self->effects->arpeggio->curPos = self->effects->arpeggio->list->head;
 			self->stillPlaying = true;
 			self->effects->released = false;
 		} else {
@@ -25,46 +39,64 @@ void updateKey(Note* self, int8_t keyNumber) {
 	getKey(self->key, keyNumber);
 }
 
-void updateTuningWord(Note* self, volatile uint32_t* tuningWord) {
+void calculateTuningWord(volatile uint32_t* tuningWord, int8_t key, uint8_t octave, int8_t arpeggioModifier) {
+	// convert everything into one giant number know as keyNumber
+	int16_t keyNumber;
+	keyNumber = (octave+3) * KEYS_PER_OCT + key + arpeggioModifier;
+	if (keyNumber < 0 || keyNumber > (NUM_OCTAVES * KEYS_PER_OCT) - 1 ) {
+		// note is too low or too high to play
+		*tuningWord = NO_SOUND;
+	} else {
+		octave = 0;
+		//need to calculate our new oct and key
+		while (keyNumber > KEYS_PER_OCT) {
+		keyNumber -= KEYS_PER_OCT;
+		octave++;
+		}
+		*tuningWord = TUNING_CONST * noteFreq[octave][keyNumber];
+	}
+}
+
+void updateTuningWord(Note* effect, volatile uint32_t* tuningWord) {
 	static int8_t lastKeyLetter = NO_NOTE;
 	static int8_t keyLetter = NO_NOTE;
 	static uint8_t keyOct = 0;
 	static uint8_t lastKeyOct = 0;
 
-	keyOct = self->key->octave;
-	keyLetter = self->key->letter;
+	keyOct = effect->key->octave;
+	keyLetter = effect->key->letter;
 	
 	// check if we need to account for effects
-	if (self->effects->enabled) {
+	if (effect->effects->enabled) {
 		
-		// check to make sure we still need to play a note
-		if (!self->stillPlaying) {		
+		// check to make sure we still need to play a effect
+		if (!effect->stillPlaying) {		
 				// check if this is a noise channel as there are some special cases here
-				if (self->isNoise) {
+				if (effect->isNoise) {
 					*tuningWord = NO_NOTE;
 				} else {
 					*tuningWord = NO_SOUND;		
 				}
 			
-			// key isn't held but we need to continue the note. Reassign values and wait for stillPlaying to be false
+			// key isn't held but we need to continue the effect. Reassign values and wait for stillPlaying to be false
 		} else if(keyLetter == NO_NOTE) { // loop & release stuff
 				keyOct = lastKeyOct;
 				keyLetter = lastKeyLetter;	
 				
 				// check if this is a noise channel as there are some special cases here
-				if (self->isNoise) {
+				if (effect->isNoise) {
 					updateNoiseTWord(keyOct, keyLetter, tuningWord);
 				} else {
-					*tuningWord = TUNING_CONST * noteFreq[lastKeyOct + 2][lastKeyLetter];
+					calculateTuningWord(tuningWord, lastKeyLetter, lastKeyOct, arpeggioModifier);
 				}
 		
 			// a new key has been pressed	
 		} else if (keyLetter != lastKeyLetter || keyOct != lastKeyOct) {	
 			// check if this is a noise channel as there are some special cases here
-				if (self->isNoise) {
+				if (effect->isNoise) {
 					updateNoiseTWord(keyOct, keyLetter, tuningWord);
 				} else {
-					*tuningWord = TUNING_CONST * noteFreq[self->key->octave + 2][self->key->letter];
+					calculateTuningWord(tuningWord, keyLetter, keyOct, arpeggioModifier);
 				}
 		}
 		
@@ -74,10 +106,10 @@ void updateTuningWord(Note* self, volatile uint32_t* tuningWord) {
 			*tuningWord = NO_SOUND;
 		} else {	
 			// check if this is a noise channel as there are some special cases here
-			if (self->isNoise) {
+			if (effect->isNoise) {
 				updateNoiseTWord(keyOct, keyLetter, tuningWord);
 			} else {
-					*tuningWord = TUNING_CONST * noteFreq[self->key->octave + 2][self->key->letter];
+					calculateTuningWord(tuningWord, keyLetter, keyOct, 0);
 			}
 		}
 	}
@@ -97,59 +129,77 @@ void updateTuningWord(Note* self, volatile uint32_t* tuningWord) {
  * >-----L------R------E
  */
 void updateEffects(Note* self, int8_t* refTable) {
-	if (self->effects->volumeEnabled && self->stillPlaying) {
+	if (self->stillPlaying) {
 		//first we adjust our volume and then we increment our state
-		adjustVolume(self, refTable);
-		updateVolume(self);
+		if (self->effects->arpeggioEnabled) {
+			adjustArpeggio(self);
+			updateEffect(self, self->effects->arpeggio);
+		}		
+		if (self->effects->volumeEnabled) {
+			adjustVolume(self, refTable);
+			updateEffect(self, self->effects->volume);
+		}
 	}
 }
+
+void updateEffect(Note* self, Effect* effect) {
+	bool isNoNote = (self->key->letter == NO_NOTE);
+	EffectState* state;
+	// make sure we still holding the key
+	// if there is no note being played and we having marked the key as released
+	if (isNoNote && !self->effects->released) {
+		// key isn't pressed and we need to skip to release point
+		effect->curPos = effect->releasePos;
+		self->effects->released = true;
+	}
 	
-void updateVolume(Note* self) {
+	state = (EffectState*)effect->curPos->data;
+	
 	// in all the below methods we assume the list has proper markers. BEWARE of the NULL(S)!
-	switch(((VolumeEff*)self->effects->volumeCur->data)->marker) {
+	switch(state->marker) {
 		
 		case LOOP_MARKER:	
 			// we see the loop marker so we save it off
-			self->effects->volumeLoopPos = self->effects->volumeCur;
+			effect->loopPos = effect->curPos;
 			// update our waveTable and increment the counter by one
-			if (updateVolumeState(self->effects)) {
-				self->effects->volumeCur = self->effects->volumeCur->next;
+			if (updateState(state)) {
+				effect->curPos = effect->curPos->next;
 			}
 			break;
 		
 		case RELEASE_MARKER: 
-			if (self->key->letter != NO_NOTE) {
-				// if note is still pressed we mark release location and go back to the start of loop
-				self->effects->volumeReleasePos = self->effects->volumeCur;
-				if (updateVolumeState(self->effects)) {
-					self->effects->volumeCur = self->effects->volumeLoopPos;
+			if (!isNoNote) {
+				// if effect is still pressed we mark release location and go back to the start of loop
+				effect->releasePos = effect->curPos;
+				if (updateState(state)) {
+					effect->curPos = effect->loopPos;
 				}
 			} else {
 				//proceed as normal
 				// update our waveTable and increment the counter by one
-				if (updateVolumeState(self->effects)) {
-					self->effects->volumeCur = self->effects->volumeCur->next;
+				if (updateState(state)) {
+					effect->curPos = effect->curPos->next;
 				}
 			}
 			break;
 		
 		case END_MARKER:
-			// in this case we disable the note and reset the counter
+			// in this case we disable the effect and reset the counter
 			self->stillPlaying = false;
-			self->effects->volumeCur = self->effects->volumeList->head;
+			effect->curPos = effect->list->head;
 			break;
 		
 		default:
 			// make sure we still holding the key
 			// or key isn't pressed and we are passed/at the release point so just keep going
-			if (self->key->letter != NO_NOTE || self->effects->released) {
+			if (!isNoNote || self->effects->released) {
 				// update our waveTable and increment the counter by one
-				if (updateVolumeState(self->effects)) {
-					self->effects->volumeCur = self->effects->volumeCur->next;
+				if (updateState(state)) {
+					effect->curPos = effect->curPos->next;
 				}
 			} else {
 				// key isn't pressed and we need to skip to release point
-				self->effects->volumeCur = self->effects->volumeReleasePos;
+				effect->curPos = effect->releasePos;
 				self->effects->released = true;
 			}
 			break;
@@ -159,18 +209,22 @@ void updateVolume(Note* self) {
 void adjustVolume(Note* self, int8_t* refTable) {
 	uint16_t i;
 	static float volumeScaler;
-	static int8_t* tempPtr;
 	
-	volumeScaler = ((VolumeEff*)self->effects->volumeCur->data)->volume;
+	// get the value stored at the location pointed by the modifier
+	volumeScaler = *(float*) ((EffectState*)self->effects->volume->curPos->data)->modifier;
 	
 	if (volumeUpdate) {
-		
+		// if volume is already updated don't do anything
 	} else {
 		for (i = 0; i < EFFECT_SIZE; i++) {
 			self->workingWaveTable[i] = (int8_t)(volumeScaler * refTable[i]);
 		}
 		volumeUpdate = true;
 	}
+}
+
+void adjustArpeggio(Note* self) {
+	arpeggioModifier = *(int8_t*) ((EffectState*)self->effects->arpeggio->curPos->data)->modifier;
 }
 
 void updateNoiseTWord(uint8_t keyOct, int8_t keyLetter, volatile uint32_t* tuningWord) {
