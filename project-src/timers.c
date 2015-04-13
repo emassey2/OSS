@@ -132,8 +132,8 @@ void SYSTICKIntHandler() {
 		wave0 = testChannel->note->waveTable;
 		volumeUpdate = false;
 	}
-	/*if (newBit && (tword3 != NO_NOTE)) {
-		PWM0_0_CMPB_R = wave0[0];
+	/*if (newBit && (tword3 != NO_SOUND)) {
+		PWM0_0_CMPB_R = wave0[0]+127;
 	} else {
 		PWM0_0_CMPB_R = 0;
 	}*/
@@ -166,5 +166,5 @@ void TIMER1IntHandler() {
 		}
 		
 		// set our new period and make sure we don't go out of array bounds
-		TIMER1_TAILR_R = (10000 / noisePeriod[tword3 % NOISE_FREQS])-1;
+		TIMER1_TAILR_R = (10000 / noisePeriod[tword3 % (NOISE_FREQS+1)])-1;
 }

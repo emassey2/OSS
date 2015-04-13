@@ -8,12 +8,13 @@ extern uint32_t currentVolumeDuration;
 extern uint32_t currentArpeggioDuration;
 
 
-Note* initNote(bool isNoise, int8_t* waveTableRef) {
+Note* initNote(bool isNoise, int8_t* waveTableRef, uint8_t octaveMod) {
 	uint16_t i;
 	Note* self = malloc(sizeof(Note));
 	self->waveTable = malloc(sizeof(int8_t [WAVE_TABLE_SIZE]));
 	self->workingWaveTable = malloc(sizeof(int8_t [WAVE_TABLE_SIZE]));
-	self->isNoise = false;
+	self->isNoise = isNoise;
+	self->octaveMod = octaveMod;
 	
 	for (i = 0; i < EFFECT_SIZE; i++) {
 			self->workingWaveTable[i] = waveTableRef[i];
@@ -47,10 +48,11 @@ void updateKey(Note* self, int8_t keyNumber) {
 	getKey(self->key, keyNumber);
 }
 
-void calculateTuningWord(volatile uint32_t* tuningWord, int8_t key, uint8_t octave, int8_t arpeggioModifier) {
+void calculateTuningWord(volatile uint32_t* tuningWord, int8_t key, uint8_t octave, int8_t arpeggioModifier, bool isNoise, uint8_t octaveMod) {
 	// convert everything into one giant number know as keyNumber
 	int16_t keyNumber;
-	keyNumber = (octave + 3) * KEYS_PER_OCT + key + arpeggioModifier;
+	
+	keyNumber = (octave + octaveMod) * KEYS_PER_OCT + key + arpeggioModifier;
 	if (keyNumber < 0 || keyNumber > (NUM_OCTAVES * KEYS_PER_OCT) - 1 ) {
 		// note is too low or too high to play
 		*tuningWord = NO_SOUND;
@@ -61,54 +63,43 @@ void calculateTuningWord(volatile uint32_t* tuningWord, int8_t key, uint8_t octa
 		keyNumber -= KEYS_PER_OCT;
 		octave++;
 		}
-		*tuningWord = TUNING_CONST * noteFreq[octave][keyNumber];
+		if (isNoise) {
+			updateNoiseTWord(octave, keyNumber, tuningWord);
+		} else {
+			*tuningWord = TUNING_CONST * noteFreq[octave][keyNumber];
+		}
 	}
 }
 
-void updateTuningWord(Note* effect, volatile uint32_t* tuningWord) {
+void updateTuningWord(Note* self, volatile uint32_t* tuningWord) {
 	static int8_t lastKeyLetter = NO_NOTE;
 	static int8_t keyLetter = NO_NOTE;
 	static uint8_t keyOct = 0;
 	static uint8_t lastKeyOct = 0;
 
-	keyOct = effect->key->octave;
-	keyLetter = effect->key->letter;
+	keyOct = self->key->octave;
+	keyLetter = self->key->letter;
 	
 	// check if we need to account for effects
-	if (effect->effects->enabled) {
+	if (self->effects->enabled) {
 		
-		// check to make sure we still need to play a effect
-		if (!effect->stillPlaying) {		
+		// check to make sure we still need to play a self
+		if (!self->stillPlaying) {		
 				// check if this is a noise channel as there are some special cases here
-				if (effect->isNoise) {
-					*tuningWord = NO_NOTE;
-				} else {
-					*tuningWord = NO_SOUND;		
-				}
-			
-			// key isn't held but we need to continue the effect. Reassign values and wait for stillPlaying to be false
+				*tuningWord = NO_SOUND;
+
+			// key isn't held but we need to continue the self. Reassign values and wait for stillPlaying to be false
 		} else if(keyLetter == NO_NOTE) { // loop & release stuff
 				keyOct = lastKeyOct;
 				keyLetter = lastKeyLetter;	
-				
-				// check if this is a noise channel as there are some special cases here
-				if (effect->isNoise) {
-					updateNoiseTWord(keyOct, keyLetter, tuningWord);
-				} else {
-					calculateTuningWord(tuningWord, lastKeyLetter, lastKeyOct, arpeggioModifier);
-				}
-		
+				calculateTuningWord(tuningWord, lastKeyLetter, lastKeyOct, arpeggioModifier, self->isNoise, self->octaveMod);
+			
 			// a new key has been pressed	
 		} else if (keyLetter != lastKeyLetter || keyOct != lastKeyOct) {	
-			// check if this is a noise channel as there are some special cases here
-				if (effect->isNoise) {
-					updateNoiseTWord(keyOct, keyLetter, tuningWord);
-				} else {
-					calculateTuningWord(tuningWord, keyLetter, keyOct, arpeggioModifier);
-				}
+				calculateTuningWord(tuningWord, keyLetter, keyOct, arpeggioModifier, self->isNoise, self->octaveMod);
 		} else {
-			//update Tuningword like normal
-			calculateTuningWord(tuningWord, keyLetter, keyOct, arpeggioModifier);
+				//update Tuningword like normal
+				calculateTuningWord(tuningWord, keyLetter, keyOct, arpeggioModifier, self->isNoise, self->octaveMod);
 		}
 		
 	//effects can be ignored
@@ -116,12 +107,7 @@ void updateTuningWord(Note* effect, volatile uint32_t* tuningWord) {
 		if (keyLetter == NO_NOTE) {
 			*tuningWord = NO_SOUND;
 		} else {	
-			// check if this is a noise channel as there are some special cases here
-			if (effect->isNoise) {
-				updateNoiseTWord(keyOct, keyLetter, tuningWord);
-			} else {
-					calculateTuningWord(tuningWord, keyLetter, keyOct, 0);
-			}
+				calculateTuningWord(tuningWord, keyLetter, keyOct, 0, self->isNoise, self->octaveMod);
 		}
 	}
 	
@@ -250,9 +236,9 @@ void updateNoiseTWord(uint8_t keyOct, int8_t keyLetter, volatile uint32_t* tunin
 	// check to see if any key is pressed
 	if (keyLetter != NO_NOTE) {
 		// tuning word is repurposed in the case where we want to generate random noise
-		*tuningWord = ((keyLetter * (keyOct+1)) % NOISE_FREQS);
+		*tuningWord = ((keyLetter  + (KEYS_PER_OCT*keyOct)) % NOISE_FREQS)+1;
 	} else {
-		*tuningWord = NO_NOTE;
+		*tuningWord = NO_SOUND;
 	}
 }
 
