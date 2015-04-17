@@ -17,7 +17,7 @@ void initChannel(Channel** channel, int8_t** outputTable, int8_t* waveTableRef) 
 	
 	//below should/will be its own method
 	
-	(*channel)->note->effects = initEffects(true, false, true);
+	(*channel)->note->effects = initEffects(true, false, true, false);
 	
 	//TODO: work on a solution to mark our loop and release pos ?
 

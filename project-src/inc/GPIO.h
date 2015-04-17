@@ -36,8 +36,10 @@
 /******************************************************************************
  * Function Prototypes
  *****************************************************************************/
- void initGPIOPorts(void);
- void initGPIOPortA(void);
- void initGPIOPortB(void);
- void initGPIOPortD(void);
- void initGPIOPortE(void);
+void initGPIOPorts(void);
+void initGPIOPortA(void);
+void initGPIOPortB(void);
+void initGPIOPortC(void);
+void initGPIOPortD(void);
+void initGPIOPortE(void);
+void initGPIOPortF(void);

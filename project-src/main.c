@@ -9,6 +9,7 @@
 #include "inc/GPIO.h"
 #include "inc/linkedList.h"
 #include "inc/PWM.h"
+#include "inc/qei.h"
 #include "inc/scanningMatrix.h"
 #include "inc/timers.h"
 #include "inc/tm4c123gh6pm.h"
@@ -67,7 +68,7 @@ Node *cur;
 
 int8_t keyNumber;
 
-uint16_t i;
+uint32_t i, pos;
 int8_t* keyNumberPtr;
 
 //*****************************************************************************
@@ -80,6 +81,7 @@ extern void DisableInterrupts(void);
 //*****************************************************************************
 //*****************************************************************************
 int main(void) {
+	char posArray[40];
   PLL_Init();
 	
 	initPollingUART0();
@@ -95,12 +97,30 @@ int main(void) {
 	initTimers();
 	
 	UART0_TxPoll("\n\rInitializing Channels...");
-	initChannel(&testChannel, &wave0, square12);
+	initChannel(&testChannel, &wave0, triangle);
 	
 	UART0_TxPoll("\n\rEntering Main Loop");
+	//initQei1();
 	
 	recordLoopNum = 0;
+
   while(1) { 
+		/*while(1){
+			
+			
+			pos = getPos();
+			
+			//delay
+			for(i = 0; i < 8000000 ; i++ ){}
+			
+
+			//	pos = getPos();
+				sprintf(posArray, "\n\rPos was: %d", pos);
+				
+			
+			
+		}*/
+		
 		if (alertEffect) {
 			alertEffect = false;
 			updateEffects(testChannel->note, testChannel->waveTable_ref);
@@ -130,6 +150,7 @@ int main(void) {
 			
 			keyNumber = scanMatrix(scanningMatrix);
 			updateKey(testChannel->note, keyNumber);
+			//printMatrix(scanningMatrix);
 		}
 		updateTuningWord(testChannel->note, &tword0);
 

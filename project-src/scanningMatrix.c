@@ -6,6 +6,8 @@
 int8_t scanMatrix(bool matrix[NUM_ROWS][NUM_COLS]) {
 	uint8_t i, j, k, col, row;
 	int8_t keyPressed;
+	bool keyIsPressed;
+	keyIsPressed	= false;
 	keyPressed = NO_NOTE;
 	for (i = 0; i < NUM_ROWS; i++) {
 		switch(i) {
@@ -27,8 +29,9 @@ int8_t scanMatrix(bool matrix[NUM_ROWS][NUM_COLS]) {
 		}
 		
 		//set all pins low then set our new one high
-		GPIO_PORTD_DATA_R |= ROWS;
-		GPIO_PORTD_DATA_R &= ~row;
+		GPIO_PORTE_DATA_R |= ROWS;
+		GPIO_PORTE_DATA_R &= ~row;
+		
 		
 		// wait for a little bit to allow voltage to build
 		for (k = 0; k < 20; k++);
@@ -51,12 +54,25 @@ int8_t scanMatrix(bool matrix[NUM_ROWS][NUM_COLS]) {
 							col = COL5;
 							break;
 					}
-					if (GPIO_PORTE_DATA_R & col) {
+					
+					// COL5 is in portE not portC and thus is a special case
+					if (col != COL5) {
+						if (GPIO_PORTC_DATA_R & col) {
+							keyIsPressed = true;
+						}
+					} else {
+						if (GPIO_PORTE_DATA_R & col) {
+							keyIsPressed = true;
+						}
+					}
+					
+					if (keyIsPressed) {
 						matrix[i][j] = true;
 						keyPressed = (i * 5) + j;
 					} else {
 						matrix[i][j] = false;
 					}
+					keyIsPressed = false;
 		}
 	}
 	

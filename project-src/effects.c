@@ -3,8 +3,9 @@
 
 uint32_t currentVolumeDuration = 0;
 uint32_t currentArpeggioDuration = 0;
+uint32_t currentPitchDuration = 0;
 
-Effects* initEffects(bool enabled, bool volEnabled, bool arpEnabled) {
+Effects* initEffects(bool enabled, bool volEnabled, bool arpEnabled, bool pitchEnabled) {
 	Effects* self = malloc(sizeof(Effects));
 	self->enabled = enabled;
 	self->volumeEnabled = volEnabled;
@@ -16,6 +17,10 @@ Effects* initEffects(bool enabled, bool volEnabled, bool arpEnabled) {
 			initEffect(self->volume);
 		}
 		if (arpEnabled) {
+			self->arpeggio = malloc(sizeof(Effect));
+			initEffect(self->arpeggio);
+		}
+		if (pitchEnabled) {
 			self->arpeggio = malloc(sizeof(Effect));
 			initEffect(self->arpeggio);
 		}
@@ -56,6 +61,17 @@ EffectState* newArpeggioEff(int8_t distance, uint32_t duration, char marker) {
 	return arpeggioEff;
 }
 
+// returns a pointer to the new PitchEff
+EffectState* newPitchEff(int8_t rate, uint32_t duration, char marker) {
+	EffectState* pitchEff = malloc(sizeof(EffectState));
+	pitchEff->modifier = malloc(sizeof(int8_t));
+	*((int8_t*)pitchEff->modifier) = rate;
+	pitchEff->duration = duration;
+	pitchEff->marker = marker;
+	
+	return pitchEff;
+}
+
 bool updateState(EffectState* self) {
 	if (self->type == VOLUME) {
 		return updateVolumeState(self);
@@ -86,6 +102,18 @@ bool updateArpeggioState(EffectState* self) {
 		return false;
 	} else {
 		currentArpeggioDuration = 0;
+		return true;
+	}
+}
+
+bool updatePitchState(EffectState* self) {
+	// keeps track how long we have been in a given state
+	
+	if ((self)->duration > currentPitchDuration) {
+		currentPitchDuration++;
+		return false;
+	} else {
+		currentPitchDuration = 0;
 		return true;
 	}
 }

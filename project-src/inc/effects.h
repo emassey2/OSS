@@ -18,7 +18,11 @@
 
 
 
-/* EACH CHANNEEL... */
+/* Each channel holds an Effects struct. Inse this struct there are pointers to
+	each possible Effect and a bool if that effect is enabled or not. Each Effect
+	is a linked list of effectStates that hold the duration of a given effect,
+	what it does for that duration, and if it marks a special location in the 
+	linked list. Information on the special locations are shown below.*/
 
 
 
@@ -46,9 +50,11 @@ typedef struct Effects {
 	bool enabled;						// if effects as a whole are enabled
 	bool volumeEnabled;			// if volume effects are enabled
 	bool arpeggioEnabled;		// if arpeggio effects are enabled
+	bool pitchEnabled;			// if pitch effects are enabled
 	bool released;					// if the key is no longer being pressed
 	Effect* volume;					// ptr to our volume Effects
 	Effect* arpeggio;				// ptr to our arpeggio Effects
+	Effect* pitch;
 }Effects;
 
 // a given state in the list of an effect
@@ -59,13 +65,15 @@ typedef struct EffectState {
 	char			type;					// the type of effect eg volume or arpeggio
 }EffectState;
 
-Effects* initEffects(bool enabled, bool volEnabled, bool arpEnabled);
+Effects* initEffects(bool enabled, bool volEnabled, bool arpEnabled, bool pitchEnabled);
 bool updateState(EffectState* self);
 
 void initEffect(Effect* self);
 bool updateVolumeState(EffectState* self);
 bool updateArpeggioState(EffectState* self);
+bool updatePitchState(EffectState* self);
 
 // basically a constructor - returns a pointer to an effect with given params
 EffectState* newVolumeEff(float volume, uint32_t duration, char marker);
 EffectState* newArpeggioEff(int8_t distance, uint32_t duration, char marker);
+EffectState* newPitchEff(int8_t rate, uint32_t duration, char marker);

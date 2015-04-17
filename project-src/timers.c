@@ -23,9 +23,11 @@ extern volatile bool volumeUpdate;
 volatile uint8_t testIndex = 0;
 
 int8_t* wave0 = triangle;
-int8_t* wave1 = square50;
+int8_t* wave1 = square12;
 int8_t* wave2 = square50;
-int8_t* wave3 = square50;
+int8_t* wave3 = noise;
+int8_t* wave4 = sine;
+int8_t* wave5 = saw;
 
 
 int8_t* tempPtr;
@@ -120,8 +122,12 @@ void SYSTICKIntHandler() {
 	//offset3 = lfsr >> 7; //phaseAccum3 >> 24;  		// use only the upper 8 bits from the phaseAccum3 (256)
 	
 	//combine voices (add and shift right one to get a rough average)
-	PWM0_0_CMPA_R = (saw[offset0] + square50[offset1]) >> 1;
-	PWM0_0_CMPB_R = (wave0[offset0] + 127);
+	PWM0_0_CMPA_R = (wave0[offset0] + 127);
+	PWM0_0_CMPB_R = (wave1[offset0] + 127);
+	PWM0_1_CMPA_R = (wave2[offset0] + 127);
+	//PWM0_1_CMPB_R = (wave3[offset0] + 127);
+	PWM1_2_CMPA_R = (wave4[offset0] + 127);
+	PWM1_2_CMPB_R = (wave5[offset0] + 127);
 	
 	if (offset0 == 0 && volumeUpdate) {	
 		
@@ -132,11 +138,11 @@ void SYSTICKIntHandler() {
 		wave0 = testChannel->note->waveTable;
 		volumeUpdate = false;
 	}
-	/*if (newBit && (tword3 != NO_SOUND)) {
-		PWM0_0_CMPB_R = wave0[0]+127;
+	if (newBit && (tword0 != NO_SOUND)) {
+		PWM0_1_CMPB_R = wave3[0]+127;
 	} else {
-		PWM0_0_CMPB_R = 0;
-	}*/
+		PWM0_1_CMPB_R = 0;
+	}
 }
 
 void TIMER0IntHandler() {}

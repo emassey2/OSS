@@ -6,6 +6,7 @@ int8_t arpeggioModifier = 0;
 
 extern uint32_t currentVolumeDuration;
 extern uint32_t currentArpeggioDuration;
+extern uint32_t currentPitchDuration;
 
 
 Note* initNote(bool isNoise, int8_t* waveTableRef, uint8_t octaveMod) {
