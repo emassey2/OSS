@@ -49,7 +49,7 @@ void initChannel(Channel** channel, int8_t** outputTable, int8_t* waveTableRef) 
 	volumeEff = newVolumeEff(.5, 88, NO_MARKER);							
 	add((*channel)->note->effects->volume->list, volumeEff);
 	
-	volumeEff = newVolumeEff(.4, 88, NO_MARKER);							
+	volumeEff = newVolumeEff(.4, 880, NO_MARKER);							
 	add((*channel)->note->effects->volume->list, volumeEff);
 	
 	volumeEff = newVolumeEff(.3, 88, NO_MARKER);							
@@ -65,16 +65,16 @@ void initChannel(Channel** channel, int8_t** outputTable, int8_t* waveTableRef) 
 	add((*channel)->note->effects->volume->list, volumeEff);*/
 	
 		
-	arpeggioEff = newArpeggioEff(0, 22, LOOP_MARKER);							
+	arpeggioEff = newArpeggioEff(0, 220, LOOP_MARKER);							
 	add((*channel)->note->effects->arpeggio->list, arpeggioEff);
 		
-	arpeggioEff = newArpeggioEff(4, 22, NO_MARKER);							
+	arpeggioEff = newArpeggioEff(4, 220, NO_MARKER);							
 	add((*channel)->note->effects->arpeggio->list, arpeggioEff);
 		
-	arpeggioEff = newArpeggioEff(7, 22, NO_MARKER);							
+	arpeggioEff = newArpeggioEff(7, 220, NO_MARKER);							
 	add((*channel)->note->effects->arpeggio->list, arpeggioEff);
 	
-	arpeggioEff = newArpeggioEff(12, 22, NO_MARKER);							
+	arpeggioEff = newArpeggioEff(12, 220, NO_MARKER);							
 	add((*channel)->note->effects->arpeggio->list, arpeggioEff);
 
 	arpeggioEff = newArpeggioEff(12, 0, RELEASE_MARKER);							

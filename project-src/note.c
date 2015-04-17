@@ -49,25 +49,26 @@ void updateKey(Note* self, int8_t keyNumber) {
 	getKey(self->key, keyNumber);
 }
 
-void calculateTuningWord(volatile uint32_t* tuningWord, int8_t key, uint8_t octave, int8_t arpeggioModifier, bool isNoise, uint8_t octaveMod) {
+void calculateTuningWord(volatile uint32_t* tuningWord, Note* self) {
 	// convert everything into one giant number know as keyNumber
 	int16_t keyNumber;
+	uint8_t workingOct = 0;
 	
-	keyNumber = (octave + octaveMod) * KEYS_PER_OCT + key + arpeggioModifier;
+	keyNumber = (self->key->octave + self->octaveMod) * KEYS_PER_OCT + self->key->letter + arpeggioModifier;
 	if (keyNumber < 0 || keyNumber > (NUM_OCTAVES * KEYS_PER_OCT) - 1 ) {
 		// note is too low or too high to play
 		*tuningWord = NO_SOUND;
 	} else {
-		octave = 0;
+		workingOct = 0;
 		//need to calculate our new oct and key
 		while (keyNumber > KEYS_PER_OCT) {
 		keyNumber -= KEYS_PER_OCT;
-		octave++;
+		workingOct++;
 		}
-		if (isNoise) {
-			updateNoiseTWord(octave, keyNumber, tuningWord);
+		if (self->isNoise) {
+			updateNoiseTWord(workingOct, keyNumber, tuningWord);
 		} else {
-			*tuningWord = TUNING_CONST * noteFreq[octave][keyNumber];
+			*tuningWord = TUNING_CONST * noteFreq[workingOct][keyNumber];
 		}
 	}
 }
@@ -91,16 +92,24 @@ void updateTuningWord(Note* self, volatile uint32_t* tuningWord) {
 
 			// key isn't held but we need to continue the self. Reassign values and wait for stillPlaying to be false
 		} else if(keyLetter == NO_NOTE) { // loop & release stuff
+			
+				self->key->letter = lastKeyLetter;
+				self->key->octave = lastKeyOct;
+				
+				calculateTuningWord(tuningWord, self);
+			
+				self->key->letter = keyLetter;
+				self->key->octave = keyOct;
+			
 				keyOct = lastKeyOct;
-				keyLetter = lastKeyLetter;	
-				calculateTuningWord(tuningWord, lastKeyLetter, lastKeyOct, arpeggioModifier, self->isNoise, self->octaveMod);
+				keyLetter = lastKeyLetter;
 			
 			// a new key has been pressed	
 		} else if (keyLetter != lastKeyLetter || keyOct != lastKeyOct) {	
-				calculateTuningWord(tuningWord, keyLetter, keyOct, arpeggioModifier, self->isNoise, self->octaveMod);
+				calculateTuningWord(tuningWord, self);
 		} else {
 				//update Tuningword like normal
-				calculateTuningWord(tuningWord, keyLetter, keyOct, arpeggioModifier, self->isNoise, self->octaveMod);
+				calculateTuningWord(tuningWord, self);
 		}
 		
 	//effects can be ignored
@@ -108,7 +117,8 @@ void updateTuningWord(Note* self, volatile uint32_t* tuningWord) {
 		if (keyLetter == NO_NOTE) {
 			*tuningWord = NO_SOUND;
 		} else {	
-				calculateTuningWord(tuningWord, keyLetter, keyOct, 0, self->isNoise, self->octaveMod);
+				arpeggioModifier = 0;
+				calculateTuningWord(tuningWord, self);
 		}
 	}
 	
@@ -130,8 +140,16 @@ void updateTuningWord(Note* self, volatile uint32_t* tuningWord) {
 void resetEffects(Note* self) {
 	currentVolumeDuration = 0;
 	currentArpeggioDuration = 0;
-	self->effects->volume->curPos = self->effects->volume->list->head;
-	self->effects->arpeggio->curPos = self->effects->arpeggio->list->head;
+	currentPitchDuration = 0;
+	if (self->effects->volumeEnabled) {
+		self->effects->volume->curPos = self->effects->volume->list->head;
+	}
+	if (self->effects->arpeggioEnabled) {
+		self->effects->arpeggio->curPos = self->effects->arpeggio->list->head;
+	}
+	if (self->effects->pitchEnabled) {
+		self->effects->pitch->curPos = self->effects->pitch->list->head;
+	}
 }
 
 void updateEffects(Note* self, int8_t* refTable) {
@@ -144,6 +162,10 @@ void updateEffects(Note* self, int8_t* refTable) {
 		if (self->effects->volumeEnabled) {
 			adjustVolume(self, refTable);
 			updateEffect(self, self->effects->volume);
+		}
+		if (self->effects->pitchEnabled) {
+			adjustPitch(self);
+			updateEffect(self, self->effects->pitch);
 		}
 	}
 }
@@ -231,6 +253,9 @@ void adjustVolume(Note* self, int8_t* refTable) {
 
 void adjustArpeggio(Note* self) {
 	arpeggioModifier = *(int8_t*) ((EffectState*)self->effects->arpeggio->curPos->data)->modifier;
+}
+
+void adjustPitch(Note* self) {
 }
 
 void updateNoiseTWord(uint8_t keyOct, int8_t keyLetter, volatile uint32_t* tuningWord) {

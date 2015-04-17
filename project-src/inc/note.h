@@ -17,13 +17,14 @@ typedef struct Note {
 	uint8_t octaveMod;
 }Note;
 
-void updateKey(Note* self, int8_t keyNumber);
-void updateTuningWord(Note* self, volatile uint32_t* tuningWord);
-void updateEffects(Note* self, int8_t* refTable);
-void updateEffect(Note* self, Effect* effect);
-void adjustVolume(Note* self, int8_t* refTable);
 void adjustArpeggio(Note* self);
-void updateNoiseTWord(uint8_t keyOct, int8_t keyLetter, volatile uint32_t* tuningWord);
-void calculateTuningWord(volatile uint32_t* tuningWord, int8_t key, uint8_t octave, int8_t arpeggioModifier, bool isNoise, uint8_t octaveMod);
+void adjustPitch(Note* self);
+void adjustVolume(Note* self, int8_t* refTable);
 Note* initNote(bool isNoise, int8_t* waveTableRef, uint8_t octaveMod);
+void calculateTuningWord(volatile uint32_t* tuningWord, Note* self);
 void resetEffects(Note* self);
+void updateEffect(Note* self, Effect* effect);
+void updateEffects(Note* self, int8_t* refTable);
+void updateKey(Note* self, int8_t keyNumber);
+void updateNoiseTWord(uint8_t keyOct, int8_t keyLetter, volatile uint32_t* tuningWord);
+void updateTuningWord(Note* self, volatile uint32_t* tuningWord);
