@@ -3,6 +3,7 @@
 
 volatile bool volumeUpdate = false;
 int8_t arpeggioModifier = 0;
+int32_t pitchModifier = 0;
 
 extern uint32_t currentVolumeDuration;
 extern uint32_t currentArpeggioDuration;
@@ -53,6 +54,7 @@ void calculateTuningWord(volatile uint32_t* tuningWord, Note* self) {
 	// convert everything into one giant number know as keyNumber
 	int16_t keyNumber;
 	uint8_t workingOct = 0;
+	uint32_t tempTword = 0;
 	
 	keyNumber = (self->key->octave + self->octaveMod) * KEYS_PER_OCT + self->key->letter + arpeggioModifier;
 	if (keyNumber < 0 || keyNumber > (NUM_OCTAVES * KEYS_PER_OCT) - 1 ) {
@@ -65,11 +67,30 @@ void calculateTuningWord(volatile uint32_t* tuningWord, Note* self) {
 		keyNumber -= KEYS_PER_OCT;
 		workingOct++;
 		}
-		if (self->isNoise) {
-			updateNoiseTWord(workingOct, keyNumber, tuningWord);
+		
+		if (self->effects->pitchEnabled) {
+			// make sure we don't over or underflow
+			if ( (pitchModifier < 0 && (*tuningWord + pitchModifier) > *tuningWord) 
+				|| (pitchModifier > 0 && (*tuningWord + pitchModifier) < *tuningWord)) {
+					// overflow or underflow - do nothing
+					*tuningWord = NO_SOUND;
+				} else {
+							if (self->isNoise) {
+								updateNoiseTWord(workingOct, keyNumber, tuningWord + pitchModifier);
+							} else {
+								tempTword = (TUNING_CONST * noteFreq[workingOct][keyNumber]) + pitchModifier;
+								*tuningWord = tempTword;
+							}
+			}
 		} else {
-			*tuningWord = TUNING_CONST * noteFreq[workingOct][keyNumber];
+					if (self->isNoise) {
+						updateNoiseTWord(workingOct, keyNumber, tuningWord);
+					} else {
+						*tuningWord = (TUNING_CONST * noteFreq[workingOct][keyNumber]);
+					}
 		}
+		
+
 	}
 }
 
@@ -146,6 +167,7 @@ void resetEffects(Note* self) {
 	}
 	if (self->effects->arpeggioEnabled) {
 		self->effects->arpeggio->curPos = self->effects->arpeggio->list->head;
+		arpeggioModifier = 0;
 	}
 	if (self->effects->pitchEnabled) {
 		self->effects->pitch->curPos = self->effects->pitch->list->head;
@@ -256,6 +278,18 @@ void adjustArpeggio(Note* self) {
 }
 
 void adjustPitch(Note* self) {
+	static int32_t rate = 0;
+	rate = (*(int32_t*) ((EffectState*)self->effects->pitch->curPos->data)->modifier);
+	
+	// make sure we don't over or underflow
+	if ( (rate < 0 && pitchModifier < 0 && (rate + pitchModifier) > 0) 
+		|| (rate > 0 && pitchModifier > 0 && (rate + pitchModifier) < 0)) {
+			//do nothing
+			pitchModifier = pitchModifier;
+		} else {
+			pitchModifier += rate;
+		}
+		
 }
 
 void updateNoiseTWord(uint8_t keyOct, int8_t keyLetter, volatile uint32_t* tuningWord) {

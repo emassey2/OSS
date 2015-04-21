@@ -6,6 +6,7 @@
 void initChannel(Channel** channel, int8_t** outputTable, int8_t* waveTableRef) {
 	EffectState *volumeEff;
 	EffectState *arpeggioEff;
+	EffectState *pitchEff;
 	
 	*channel = malloc(sizeof(Channel));
 	(*channel)->waveTable_ref = waveTableRef;
@@ -15,9 +16,12 @@ void initChannel(Channel** channel, int8_t** outputTable, int8_t* waveTableRef) 
 	
 	(*channel)->note->key = initKey();
 	
+	(*channel)->mute = false;
+	
 	//below should/will be its own method
 	
-	(*channel)->note->effects = initEffects(true, false, true, false);
+	(*channel)->note->effects = initEffects(true, false, false, true);
+	//(*channel)->note->effects = initEffects(false, false, false, false);
 	
 	//TODO: work on a solution to mark our loop and release pos ?
 
@@ -62,7 +66,7 @@ void initChannel(Channel** channel, int8_t** outputTable, int8_t* waveTableRef) 
 	add((*channel)->note->effects->volume->list, volumeEff);
 	
 	volumeEff = newVolumeEff(0, 0, END_MARKER);							//end
-	add((*channel)->note->effects->volume->list, volumeEff);*/
+	add((*channel)->note->effects->volume->list, volumeEff);
 	
 		
 	arpeggioEff = newArpeggioEff(0, 220, LOOP_MARKER);							
@@ -82,45 +86,25 @@ void initChannel(Channel** channel, int8_t** outputTable, int8_t* waveTableRef) 
 	(*channel)->note->effects->arpeggio->releasePos = (*channel)->note->effects->arpeggio->list->tail;
 	
 	arpeggioEff = newArpeggioEff(0, 0, END_MARKER);							//end
-	add((*channel)->note->effects->arpeggio->list, arpeggioEff);
+	add((*channel)->note->effects->arpeggio->list, arpeggioEff);*/
+	
+	pitchEff = newPitchEff(200000, 220, LOOP_MARKER);							
+	add((*channel)->note->effects->pitch->list, pitchEff);
+		
+	pitchEff = newPitchEff(200000, 220, RELEASE_MARKER);							
+	add((*channel)->note->effects->pitch->list, pitchEff);
+	(*channel)->note->effects->pitch->releasePos = (*channel)->note->effects->pitch->list->tail;
+		
+	pitchEff = newPitchEff(20, 220, NO_MARKER);							
+	add((*channel)->note->effects->pitch->list, pitchEff);
+	
+	pitchEff = newPitchEff(0, 220, NO_MARKER);							
+	add((*channel)->note->effects->pitch->list, pitchEff);
+
+	pitchEff = newPitchEff(0, 0, NO_MARKER);							
+	add((*channel)->note->effects->pitch->list, pitchEff);
+	
+	pitchEff = newPitchEff(0, 0, END_MARKER);							//end
+	add((*channel)->note->effects->pitch->list, pitchEff);
 	
 }
-
-
-
-/* Sad to see an old function go
-
-void initADSREnvelope(Channel* self) {
-	uint32_t i;
-	
-	// A  D S      R
-	//    ^ 
- 	//   / \
- 	//  /   -------
-	// /            \
-	
-	for (i = 0; i < EFFECT_SIZE; i++){
-		if (i < ATTACK) {
-			//increase from 0 to 1
-			self->note->effects.volume[i] = 1 / (ATTACK / (float)i);
-		} else if (i < DECAY) {
-			//Decrease from 1 to our sustainable volume
-			self->note->effects.volume[i] = 1 - ((1 - SUSTAIN_VOL) * (((float)i - ATTACK)) / (DECAY - ATTACK));
-		} else if (i < SUSTAIN) {
-			//remain at our our sustainable volume
-			self->note->effects.volume[i] = SUSTAIN_VOL;
-		} else if (i < RELEASE) {
-			// decrease from our sustainable volume to 0
-			self->note->effects.volume[i] = SUSTAIN_VOL - (SUSTAIN_VOL * (((float)i - SUSTAIN)/(RELEASE - SUSTAIN)));
-		} else {
-			self->note->effects.volume[i] = 0;
-		}	
-	}
-	
-	self->note->effects.volumeLoopPos = DECAY;				// loop in the sustainable volume area
-	self->note->effects.volume[DECAY] = LOOP;
-	self->note->effects.volume[SUSTAIN] = RELEASE_PT;	// release point is right after the end of the sustain
-	self->note->effects.volumeReleasePos = SUSTAIN;
-	self->note->effects.volume[DECAY] = END;
-}
-*/

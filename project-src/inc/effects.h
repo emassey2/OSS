@@ -15,6 +15,7 @@
 #define NO_MARKER				'\0'// blank ie means nothing
 #define VOLUME					'V'	// volume type
 #define ARPEGGIO				'A'	// arpeggio type
+#define PITCH						'P'	// pitch type
 
 
 
@@ -76,4 +77,4 @@ bool updatePitchState(EffectState* self);
 // basically a constructor - returns a pointer to an effect with given params
 EffectState* newVolumeEff(float volume, uint32_t duration, char marker);
 EffectState* newArpeggioEff(int8_t distance, uint32_t duration, char marker);
-EffectState* newPitchEff(int8_t rate, uint32_t duration, char marker);
+EffectState* newPitchEff(int32_t rate, uint32_t duration, char marker);

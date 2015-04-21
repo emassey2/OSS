@@ -10,6 +10,7 @@ Effects* initEffects(bool enabled, bool volEnabled, bool arpEnabled, bool pitchE
 	self->enabled = enabled;
 	self->volumeEnabled = volEnabled;
 	self->arpeggioEnabled = arpEnabled;
+	self->pitchEnabled = pitchEnabled;
 	
 	if (enabled) {
 		if (volEnabled) {
@@ -21,14 +22,13 @@ Effects* initEffects(bool enabled, bool volEnabled, bool arpEnabled, bool pitchE
 			initEffect(self->arpeggio);
 		}
 		if (pitchEnabled) {
-			self->arpeggio = malloc(sizeof(Effect));
-			initEffect(self->arpeggio);
+			self->pitch = malloc(sizeof(Effect));
+			initEffect(self->pitch);
 		}
 	}
 	
 	return self;
 }
-
 // populates a given effects list and nodes
 void initEffect(Effect* self) {
 	self->list = newList();
@@ -62,12 +62,13 @@ EffectState* newArpeggioEff(int8_t distance, uint32_t duration, char marker) {
 }
 
 // returns a pointer to the new PitchEff
-EffectState* newPitchEff(int8_t rate, uint32_t duration, char marker) {
+EffectState* newPitchEff(int32_t rate, uint32_t duration, char marker) {
 	EffectState* pitchEff = malloc(sizeof(EffectState));
 	pitchEff->modifier = malloc(sizeof(int8_t));
-	*((int8_t*)pitchEff->modifier) = rate;
+	*((int32_t*)pitchEff->modifier) = rate;
 	pitchEff->duration = duration;
 	pitchEff->marker = marker;
+	pitchEff->type = PITCH;
 	
 	return pitchEff;
 }
@@ -77,6 +78,8 @@ bool updateState(EffectState* self) {
 		return updateVolumeState(self);
 	} else if (self->type == ARPEGGIO) {
 		return updateArpeggioState(self);
+	} else if (self->type == PITCH) {
+		return updatePitchState(self);
 	}
 	//hopefully don't get here
 	return false;

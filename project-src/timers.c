@@ -15,10 +15,14 @@ volatile uint32_t tword0 = 0;
 volatile uint32_t tword1 = 0;
 volatile uint32_t tword2 = 0;
 volatile uint32_t tword3 = 0;
+volatile uint32_t tword4 = 0;
+volatile uint32_t tword5 = 0;
 volatile bool newBit = 0;
 volatile bool alertScan = false;
 volatile bool alertEffect = false;
 extern volatile bool volumeUpdate;
+
+extern Channel* ch0;
 
 volatile uint8_t testIndex = 0;
 
@@ -31,8 +35,6 @@ int8_t* wave5 = saw;
 
 
 int8_t* tempPtr;
-
-extern Channel *testChannel;
 
 void initTimers() {
 	initSysTick();
@@ -91,6 +93,10 @@ void SYSTICKIntHandler() {
 	static uint8_t offset2 = 0;
 	static uint32_t phaseAccum3 = 0;
 	static uint8_t offset3 = 0;
+	static uint32_t phaseAccum4 = 0;
+	static uint8_t offset4 = 0;
+	static uint32_t phaseAccum5 = 0;
+	static uint8_t offset5 = 0;
 	
 	if (SYS_TICK_RESET_VAL > sysTickCount) {
 		sysTickCount++;
@@ -110,7 +116,7 @@ void SYSTICKIntHandler() {
 	offset0 = phaseAccum0 >> 24;  		// use only the upper 8 bits from the phaseAccum0 (256)
 	
 	//voice 1
-	phaseAccum1 += tword1;						// Increment the Phase Accumulator0
+	phaseAccum1 += tword1;						// Increment the Phase Accumulator1
 	offset1 = phaseAccum1 >> 24;  		// use only the upper 8 bits from the phaseAccum0 (256)
 	
 	//voice 2
@@ -118,27 +124,36 @@ void SYSTICKIntHandler() {
 	offset2 = phaseAccum2 >> 24;  		// use only the upper 8 bits from the phaseAccum2 (256)
 	
 	//voice 3
-	//phaseAccum3 += tword3;						// Increment the Phase Accumulator3
-	//offset3 = lfsr >> 7; //phaseAccum3 >> 24;  		// use only the upper 8 bits from the phaseAccum3 (256)
+	phaseAccum3 += tword3;						// Increment the Phase Accumulator2
+	offset3 = phaseAccum3 >> 24;  		// use only the upper 8 bits from the phaseAccum2 (256)
+	
+	//voice 4
+	phaseAccum4 += tword4;						// Increment the Phase Accumulator2
+	offset4 = phaseAccum4 >> 24;  		// use only the upper 8 bits from the phaseAccum2 (256)
+	
+	//voice 5
+	phaseAccum5 += tword5;						// Increment the Phase Accumulator2
+	offset5 = phaseAccum5 >> 24;  		// use only the upper 8 bits from the phaseAccum2 (256)
 	
 	//combine voices (add and shift right one to get a rough average)
 	PWM0_0_CMPA_R = (wave0[offset0] + 127);
-	PWM0_0_CMPB_R = (wave1[offset0] + 127);
-	PWM0_1_CMPA_R = (wave2[offset0] + 127);
-	//PWM0_1_CMPB_R = (wave3[offset0] + 127);
-	PWM1_2_CMPA_R = (wave4[offset0] + 127);
-	PWM1_2_CMPB_R = (wave5[offset0] + 127);
+	PWM0_0_CMPB_R = (wave1[offset1] + 127);
+	PWM0_1_CMPA_R = (wave2[offset2] + 127);
+	//PWM0_1_CMPB_R = (wave3[offset3] + 127);
+	PWM1_2_CMPA_R = (wave4[offset4] + 127);
+	PWM1_2_CMPB_R = (wave5[offset5] + 127);
 	
 	if (offset0 == 0 && volumeUpdate) {	
 		
-		tempPtr = testChannel->note->waveTable;
-		testChannel->note->waveTable = testChannel->note->workingWaveTable;
-		testChannel->note->workingWaveTable = tempPtr;
+		tempPtr = ch0->note->waveTable;
+		ch0->note->waveTable = ch0->note->workingWaveTable;
+		ch0->note->workingWaveTable = tempPtr;
 		
-		wave0 = testChannel->note->waveTable;
+		wave0 = ch0->note->waveTable;
 		volumeUpdate = false;
 	}
-	if (newBit && (tword0 != NO_SOUND)) {
+	
+	if (newBit && (tword3 != NO_SOUND)) {
 		PWM0_1_CMPB_R = wave3[0]+127;
 	} else {
 		PWM0_1_CMPB_R = 0;
