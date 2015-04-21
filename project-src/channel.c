@@ -27,20 +27,13 @@ void initChannel(Channel** channel, int8_t** outputTable, int8_t* waveTableRef) 
 
 	
 
-	
-	/*volumeEff = newVolumeEff(.25, 88, NO_MARKER);							
+	/*volumeEff = newVolumeEff(1, 50, NO_MARKER);							
 	add((*channel)->note->effects->volume->list, volumeEff);
-	
-	volumeEff = newVolumeEff(.5, 88, NO_MARKER);							
-	add((*channel)->note->effects->volume->list, volumeEff);
-	
-	volumeEff = newVolumeEff(.75, 50, LOOP_MARKER);							
-	add((*channel)->note->effects->volume->list, volumeEff);
-	
-	volumeEff = newVolumeEff(1, 50, NO_MARKER);							
-	add((*channel)->note->effects->volume->list, volumeEff);	
 	
 	volumeEff = newVolumeEff(.75, 50, NO_MARKER);							
+	add((*channel)->note->effects->volume->list, volumeEff);
+	
+	volumeEff = newVolumeEff(.5, 50, LOOP_MARKER);							
 	add((*channel)->note->effects->volume->list, volumeEff);
 	
 	volumeEff = newVolumeEff(.5, 50, NO_MARKER);							
@@ -88,23 +81,41 @@ void initChannel(Channel** channel, int8_t** outputTable, int8_t* waveTableRef) 
 	arpeggioEff = newArpeggioEff(0, 0, END_MARKER);							//end
 	add((*channel)->note->effects->arpeggio->list, arpeggioEff);*/
 	
-	pitchEff = newPitchEff(200000, 220, LOOP_MARKER);							
-	add((*channel)->note->effects->pitch->list, pitchEff);
-		
-	pitchEff = newPitchEff(200000, 220, RELEASE_MARKER);							
-	add((*channel)->note->effects->pitch->list, pitchEff);
-	(*channel)->note->effects->pitch->releasePos = (*channel)->note->effects->pitch->list->tail;
-		
-	pitchEff = newPitchEff(20, 220, NO_MARKER);							
+	
+	pitchEff = newPitchEff(-5000, 50, LOOP_MARKER);							
 	add((*channel)->note->effects->pitch->list, pitchEff);
 	
-	pitchEff = newPitchEff(0, 220, NO_MARKER);							
+	pitchEff = newPitchEff(0, 50, NO_MARKER);							
 	add((*channel)->note->effects->pitch->list, pitchEff);
 
-	pitchEff = newPitchEff(0, 0, NO_MARKER);							
+	pitchEff = newPitchEff(0, 0, RELEASE_MARKER);							
 	add((*channel)->note->effects->pitch->list, pitchEff);
+	(*channel)->note->effects->pitch->releasePos = (*channel)->note->effects->pitch->list->tail;
 	
 	pitchEff = newPitchEff(0, 0, END_MARKER);							//end
 	add((*channel)->note->effects->pitch->list, pitchEff);
+	
+		
+	/*pitchEff = newPitchEff(0, 400, NO_MARKER);							
+	add((*channel)->note->effects->pitch->list, pitchEff);
+	
+	pitchEff = newPitchEff(-5000, 50, LOOP_MARKER);							
+	add((*channel)->note->effects->pitch->list, pitchEff);
+		
+	pitchEff = newPitchEff(0, 50, NO_MARKER);							
+	add((*channel)->note->effects->pitch->list, pitchEff);
+		
+	pitchEff = newPitchEff(5000, 50, NO_MARKER);							
+	add((*channel)->note->effects->pitch->list, pitchEff);
+	
+	pitchEff = newPitchEff(0, 50, NO_MARKER);							
+	add((*channel)->note->effects->pitch->list, pitchEff);
+
+	pitchEff = newPitchEff(0, 0, RELEASE_MARKER);							
+	add((*channel)->note->effects->pitch->list, pitchEff);
+	(*channel)->note->effects->pitch->releasePos = (*channel)->note->effects->pitch->list->tail;
+	
+	pitchEff = newPitchEff(0, 0, END_MARKER);							//end
+	add((*channel)->note->effects->pitch->list, pitchEff);*/
 	
 }

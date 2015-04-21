@@ -150,7 +150,7 @@ int main(void) {
 };
 
 void initChannels(void) {
-		initChannel(&ch0, &wave0, square50);
+		initChannel(&ch0, &wave0, square12);
 	/*initChannel(&ch1, &wave1, triangle);
 	initChannel(&ch2, &wave2, saw);
 	initChannel(&ch3, &wave3, noise);

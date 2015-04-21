@@ -24,6 +24,7 @@
 
 #define TUNING_CONST 32104.9
 #define NO_SOUND 0
+#define MAX_FREQ (TUNING_CONST * noteFreq[NUM_OCTAVES-1][KEYS_PER_OCT-1])
 
 // Below we define GPIO for scanning matrix 
 // PE[1:5] are rows and will be the outputs from the uC

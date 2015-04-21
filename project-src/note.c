@@ -71,7 +71,8 @@ void calculateTuningWord(volatile uint32_t* tuningWord, Note* self) {
 		if (self->effects->pitchEnabled) {
 			// make sure we don't over or underflow
 			if ( (pitchModifier < 0 && (*tuningWord + pitchModifier) > *tuningWord) 
-				|| (pitchModifier > 0 && (*tuningWord + pitchModifier) < *tuningWord)) {
+				|| (pitchModifier > 0 && (*tuningWord + pitchModifier) < *tuningWord)
+				|| (pitchModifier > 0 && (*tuningWord + pitchModifier) > MAX_FREQ)) {
 					// overflow or underflow - do nothing
 					*tuningWord = NO_SOUND;
 				} else {
@@ -128,6 +129,7 @@ void updateTuningWord(Note* self, volatile uint32_t* tuningWord) {
 			// a new key has been pressed	
 		} else if (keyLetter != lastKeyLetter || keyOct != lastKeyOct) {	
 				calculateTuningWord(tuningWord, self);
+				pitchModifier = 0;
 		} else {
 				//update Tuningword like normal
 				calculateTuningWord(tuningWord, self);
