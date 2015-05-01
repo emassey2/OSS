@@ -23,6 +23,11 @@ volatile bool alertEffect = false;
 extern volatile bool volumeUpdate;
 
 extern Channel* ch0;
+extern Channel* ch1;
+extern Channel* ch2;
+extern Channel* ch3;
+extern Channel* ch4;
+extern Channel* ch5;
 
 volatile uint8_t testIndex = 0;
 
@@ -139,17 +144,17 @@ void SYSTICKIntHandler() {
 	PWM0_0_CMPA_R = (wave0[offset0] + 127);
 	PWM0_0_CMPB_R = (wave1[offset1] + 127);
 	PWM0_1_CMPA_R = (wave2[offset2] + 127);
-	//PWM0_1_CMPB_R = (wave3[offset3] + 127);
+	//PWM0_1_CMPB_R = (wave3[offset3] + 127);	special case as it is sound. See below volume updating
 	PWM1_2_CMPA_R = (wave4[offset4] + 127);
 	PWM1_2_CMPB_R = (wave5[offset5] + 127);
 	
-	if (offset0 == 0 && volumeUpdate) {	
+	if (offset5 == 0 && volumeUpdate) {	
 		
-		tempPtr = ch0->note->waveTable;
-		ch0->note->waveTable = ch0->note->workingWaveTable;
-		ch0->note->workingWaveTable = tempPtr;
+		tempPtr = ch5->note->waveTable;
+		ch5->note->waveTable = ch5->note->workingWaveTable;
+		ch5->note->workingWaveTable = tempPtr;
 		
-		wave0 = ch0->note->waveTable;
+		wave5 = ch5->note->waveTable;
 		volumeUpdate = false;
 	}
 	

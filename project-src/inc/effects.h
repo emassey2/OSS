@@ -1,3 +1,7 @@
+#ifndef __EFFECTS_H__
+#define __EFFECTS_H__
+
+
 #include <stdbool.h>
 #include <stdint.h>
 #include "board_config.h"
@@ -78,3 +82,9 @@ bool updatePitchState(EffectState* self);
 EffectState* newVolumeEff(float volume, uint32_t duration, char marker);
 EffectState* newArpeggioEff(int8_t distance, uint32_t duration, char marker);
 EffectState* newPitchEff(int32_t rate, uint32_t duration, char marker);
+
+void initPremadeEffects(void);
+
+void setEffect(char effectType, Effects* self, Effect* premadeEffect);
+
+#endif // __EFFECTS_H__

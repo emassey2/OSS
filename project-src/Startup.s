@@ -82,6 +82,8 @@ __heap_limit
 		EXTERN SYSTICKIntHandler
 		EXTERN TIMER0IntHandler
 		EXTERN TIMER1IntHandler
+		EXTERN UART1IntHandler
+
 
 ;******************************************************************************
 ;
@@ -114,7 +116,7 @@ __Vectors       DCD     __initial_sp              		; Top of Stack
                 DCD     IntDefaultHandler             	;   3: GPIO Port D
                 DCD     IntDefaultHandler             	;   4: GPIO Port E
                 DCD     IntDefaultHandler             	;   5: UART0 Rx and Tx
-                DCD     IntDefaultHandler             	;   6: UART1 Rx and Tx
+                DCD     UART1IntHandler             	;   6: UART1 Rx and Tx
                 DCD     IntDefaultHandler              	;   7: SSI0 Rx and Tx
                 DCD     IntDefaultHandler              	;   8: I2C0 Master and Slave
                 DCD     IntDefaultHandler        		;   9: PWM Fault

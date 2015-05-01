@@ -71,3 +71,7 @@
 void initPollingUART0(void);
 char UART0_RxPoll(void);
 void UART0_TxPoll(char *data);
+
+void initPollingUART1(void);
+char UART1_RxPoll(void);
+void UART1_TxPoll(char *data);

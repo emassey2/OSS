@@ -1,3 +1,6 @@
+#ifndef __NOTE_H__
+#define __NOTE_H__
+
 #include "board_config.h"
 #include "key.h"
 #include "waves.h"
@@ -14,7 +17,11 @@ typedef struct Note {
 	int8_t* workingWaveTable;
 	bool stillPlaying;			// if we need to continue playing after a key is released
 	bool isNoise;
+	bool updateVolume;
 	uint8_t octaveMod;
+	
+	int8_t lastKeyLetter;
+	uint8_t lastKeyOct;
 }Note;
 
 void adjustArpeggio(Note* self);
@@ -28,3 +35,6 @@ void updateEffects(Note* self, int8_t* refTable);
 void updateKey(Note* self, int8_t keyNumber);
 void updateNoiseTWord(uint8_t keyOct, int8_t keyLetter, volatile uint32_t* tuningWord);
 void updateTuningWord(Note* self, volatile uint32_t* tuningWord);
+
+
+#endif

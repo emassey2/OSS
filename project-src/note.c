@@ -23,6 +23,9 @@ Note* initNote(bool isNoise, int8_t* waveTableRef, uint8_t octaveMod) {
 			self->waveTable[i] = waveTableRef[i];
 	}
 	
+	self->lastKeyLetter = NO_NOTE;
+	self->lastKeyOct = 0;
+	
 	return self;
 }
 
@@ -75,6 +78,7 @@ void calculateTuningWord(volatile uint32_t* tuningWord, Note* self) {
 				|| (pitchModifier > 0 && (*tuningWord + pitchModifier) > MAX_FREQ)) {
 					// overflow or underflow - do nothing
 					*tuningWord = NO_SOUND;
+					self->stillPlaying = false;
 				} else {
 							if (self->isNoise) {
 								updateNoiseTWord(workingOct, keyNumber, tuningWord + pitchModifier);
@@ -96,10 +100,8 @@ void calculateTuningWord(volatile uint32_t* tuningWord, Note* self) {
 }
 
 void updateTuningWord(Note* self, volatile uint32_t* tuningWord) {
-	static int8_t lastKeyLetter = NO_NOTE;
 	static int8_t keyLetter = NO_NOTE;
 	static uint8_t keyOct = 0;
-	static uint8_t lastKeyOct = 0;
 
 	keyOct = self->key->octave;
 	keyLetter = self->key->letter;
@@ -115,19 +117,19 @@ void updateTuningWord(Note* self, volatile uint32_t* tuningWord) {
 			// key isn't held but we need to continue the self. Reassign values and wait for stillPlaying to be false
 		} else if(keyLetter == NO_NOTE) { // loop & release stuff
 			
-				self->key->letter = lastKeyLetter;
-				self->key->octave = lastKeyOct;
+				self->key->letter = self->lastKeyLetter;
+				self->key->octave = self->lastKeyOct;
 				
 				calculateTuningWord(tuningWord, self);
 			
 				self->key->letter = keyLetter;
 				self->key->octave = keyOct;
 			
-				keyOct = lastKeyOct;
-				keyLetter = lastKeyLetter;
+				keyOct = self->lastKeyOct;
+				keyLetter = self->lastKeyLetter;
 			
 			// a new key has been pressed	
-		} else if (keyLetter != lastKeyLetter || keyOct != lastKeyOct) {	
+		} else if (keyLetter != self->lastKeyLetter || keyOct != self->lastKeyOct) {	
 				calculateTuningWord(tuningWord, self);
 				pitchModifier = 0;
 		} else {
@@ -145,8 +147,8 @@ void updateTuningWord(Note* self, volatile uint32_t* tuningWord) {
 		}
 	}
 	
-	lastKeyOct = keyOct;	
-	lastKeyLetter = keyLetter;
+	self->lastKeyOct = keyOct;	
+	self->lastKeyLetter = keyLetter;
 }
 
 /* Basic loop structure for effects
@@ -173,6 +175,7 @@ void resetEffects(Note* self) {
 	}
 	if (self->effects->pitchEnabled) {
 		self->effects->pitch->curPos = self->effects->pitch->list->head;
+		pitchModifier = 0;
 	}
 }
 

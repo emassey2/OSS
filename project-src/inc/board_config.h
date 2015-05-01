@@ -29,6 +29,9 @@
 #define PA6_I2C1_SCL   PIN_6
 #define PA7_I2C1_SDA   PIN_7
 
+#define PB0_U1_RX      PIN_0
+#define PB1_U1_TX      PIN_1
+
 #define PB0_TRIG_0      PIN_0
 #define PB1_PS2_BUTTON  PIN_1
 #define PB2_MOTOR_0_SA  PIN_2
